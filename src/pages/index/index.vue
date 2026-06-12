@@ -9,40 +9,42 @@
         </view>
         <view class="top-bar-nav">
           <view class="nav-item nav-item-active" @click="onNav('home')">
-            <text class="material-icons icon-fill">home</text>
+            <image class="nav-icon" src="/static/svg/animal-paw.svg" mode="aspectFit" />
             <text>首页</text>
           </view>
           <view class="nav-item" @click="onNav('food')">
-            <text class="material-icons">restaurant_menu</text>
+            <image class="nav-icon" src="/static/svg/food.svg" mode="aspectFit" />
             <text>能不能吃</text>
           </view>
           <view class="nav-item" @click="onNav('shop')">
-            <text class="material-icons">shopping_basket</text>
+            <image class="nav-icon" src="/static/svg/animal-other.svg" mode="aspectFit" />
             <text>避敏商城</text>
           </view>
           <view class="nav-item" @click="onNav('community')">
-            <text class="material-icons">diversity_3</text>
+            <image class="nav-icon" src="/static/svg/wechat.svg" mode="aspectFit" />
             <text>训宠社群</text>
           </view>
           <view class="nav-item" @click="onNav('profile')">
-            <text class="material-icons">person</text>
+            <image class="nav-icon" src="/static/svg/account.svg" mode="aspectFit" />
             <text>我的</text>
           </view>
         </view>
         <view class="top-bar-right">
-          <text class="material-icons icon-fill notification-icon">notifications</text>
+          <image class="notification-icon" src="/static/svg/message.svg" mode="aspectFit" />
         </view>
       </view>
     </view>
 
     <!-- Mobile TopAppBar -->
-    <view class="top-bar-mobile">
-      <view class="top-bar-mobile-left">
-        <image class="avatar-mobile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLf1dEm0P0iLgUzCm6Qnmti5qHATwnCMx-Zd-uLiC0JGT99aIOxe9Ej2N86u0qdFnyd66NuC0B515jh_wow_pw76Ycc2iM-br7G9S3qujTnf9_zPE5BZEMdMLPmRlCNTq5EwIzQxiAEnGi_6ixKFej1cHasJDioNo3WeQ7BKF2IhIh5gwZWegCETgRQMX9LHiBr65T4tUwnbWTMD1dxw2Ki-yaRs3hXgNrMZ_xvjGXf2cD0wIm5ehfIiowmrRbcU-k_H64-ssdFrI" />
-        <text class="brand-title">宠爱宝</text>
-      </view>
-      <text class="material-icons notification-icon">notifications</text>
-    </view>
+    <PageNavBar
+      variant="brand"
+      title="宠爱宝"
+      mobile-only
+      sticky
+      title-size="24"
+      :avatar="mobileAvatar"
+      @notification-click="onNotification"
+    />
 
     <!-- Main Content -->
     <view class="main-content">
@@ -53,14 +55,14 @@
             <image class="avatar-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIZe8qidozdJHcI6HDQml-BV2Y3f-g78oo3wD_genNQNnYT025KzVeZi8JtDJEhMFrA6V2kRInY6vGSN76uS2RoK3S_rPsa9fVQ1RJXfVmPP7nOkXta-tP0O2UKFf5L4_E6LNUH6Slq0C1NB2cOPHr7nzoW2V0t-ZVlPHfX8jmhakTIll-1KX6JwKelEVwixR-LzcUtQORRz3soF_-vIV2qVb0HA8cFeFqEUBmnuH7lDxOTXxuv2NIZZpArLCN8brwaKpyn-EIX1Y" />
           </view>
           <view class="badge-puppy">
-            <text class="material-icons badge-icon">verified</text>
+            <image class="badge-icon" src="/static/svg/cate-label.svg" mode="aspectFit" />
             <text>幼犬</text>
           </view>
         </view>
         <view class="profile-info">
           <view class="profile-name-row">
             <text class="profile-name">跳跳</text>
-            <text class="material-icons gender-icon">male</text>
+            <image class="gender-icon" src="/static/svg/gender.svg" mode="aspectFit" />
           </view>
           <text class="profile-desc">杰克罗素梗 · 8个月 · 6.5kg</text>
         </view>
@@ -74,14 +76,14 @@
         <!-- Family Sharing -->
         <view class="family-row">
           <view class="family-label">
-            <text class="material-icons family-icon">home</text>
+            <image class="family-icon" src="/static/svg/family-share.svg" mode="aspectFit" />
             <text>家庭共享</text>
           </view>
           <view class="family-members">
             <image class="member-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgbOFy4h8uh5vycfw4exV7xm9ICA0oFexv1drJdyEj2iQxVjRdD6CLS_rAToZU1Ll3spsSzKcXBfBk7zspDgnN6cEaTNzVhejwRwSJCfg3CffSLE5BOx_HLjkej15qeb075YGoy3Ml7pir5GEX49qim4V8CNXeY4V_B17EhMnVzEUPhkNcDHLa_O1DbQ65SnjzbdBHWdsmDKK0IejnFmff_jXg_gIjf0E0z4D6cT-l3dzc4AiFmcL8iggdo-fIz5WuJa6KKWp1R1s" />
             <image class="member-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAaUyW2r3sD_Az0zGkmt3N5IVyj-FUogy9tUueM0HmEB-zV25oV94h6qkNCPzk9thL5-4iiC-QFgpe29e5CVNTVzdzqYXildrjWG2Nhj7onPpZj-rKloWuCtoKKsmwB7rQ8pC_Eqd1Bb4UUGgBKT_eSKR0XAVLdogm1axoIl545pY3ghCkiai4v6d0JjOSBNt2AgECYgPB0e7-J7w-9mu8wg9yZpf08mbMf37VaAP4_YLRONVgmz_5KZFpt-ngrWBhgltVK2V_Jv0" />
             <view class="member-add">
-              <text class="material-icons">add</text>
+              <image class="member-add-icon" src="/static/svg/add-label.svg" mode="aspectFit" />
             </view>
           </view>
         </view>
@@ -91,25 +93,25 @@
       <view class="actions-row">
         <view class="action-item" @click="onAction('food')">
           <view class="action-icon action-icon-primary">
-            <text class="material-icons action-icon-inner">restaurant</text>
+            <image class="action-icon-inner" src="/static/svg/food.svg" mode="aspectFit" />
           </view>
           <text class="action-label">能不能吃</text>
         </view>
         <view class="action-item" @click="onAction('feed')">
           <view class="action-icon action-icon-teal">
-            <text class="material-icons action-icon-inner">smart_toy</text>
+            <image class="action-icon-inner" src="/static/svg/smart.svg" mode="aspectFit" />
           </view>
           <text class="action-label">智能喂养</text>
         </view>
         <view class="action-item" @click="onAction('health')">
           <view class="action-icon action-icon-error">
-            <text class="material-icons action-icon-inner">health_and_safety</text>
+            <image class="action-icon-inner" src="/static/svg/exceptional.svg" mode="aspectFit" />
           </view>
           <text class="action-label">异常自查</text>
         </view>
         <view class="action-item" @click="onAction('train')">
           <view class="action-icon action-icon-secondary">
-            <text class="material-icons action-icon-inner">school</text>
+            <image class="action-icon-inner" src="/static/svg/class.svg" mode="aspectFit" />
           </view>
           <text class="action-label">训宠课</text>
         </view>
@@ -121,27 +123,27 @@
           <text class="tasks-title">今日任务</text>
           <view class="tasks-all" @click="onAllTasks">
             <text>全部</text>
-            <text class="material-icons chevron">chevron_right</text>
+            <image class="chevron-icon" src="/static/svg/task-more.svg" mode="aspectFit" />
           </view>
         </view>
         <view class="tasks-list">
           <!-- Task 1: Completed -->
           <view class="task-card">
             <view class="task-icon-wrapper task-icon-done">
-              <text class="material-icons">set_meal</text>
+              <image class="task-icon" src="/static/svg/feeding.svg" mode="aspectFit" />
             </view>
             <view class="task-info">
               <text class="task-name">晚餐喂食</text>
               <text class="task-detail">18:00 · 120g 幼犬粮</text>
             </view>
             <view class="task-check">
-              <text class="material-icons check-icon">check</text>
+              <image class="check-icon" src="/static/svg/check-success.svg" mode="aspectFit" />
             </view>
           </view>
           <!-- Task 2: Action Needed -->
           <view class="task-card">
             <view class="task-icon-wrapper task-icon-warn">
-              <text class="material-icons">medication</text>
+              <image class="task-icon" src="/static/svg/remind.svg" mode="aspectFit" />
             </view>
             <view class="task-info">
               <text class="task-name">内驱虫提醒</text>
@@ -155,33 +157,15 @@
       </view>
     </view>
 
-    <!-- Bottom Navigation (Mobile) -->
-    <view class="bottom-nav">
-      <view class="bottom-nav-item bottom-nav-active" @click="onTab('home')">
-        <text class="material-icons icon-fill">home</text>
-        <text class="bottom-nav-label">首页</text>
-      </view>
-      <view class="bottom-nav-item" @click="onTab('food')">
-        <text class="material-icons">restaurant_menu</text>
-        <text class="bottom-nav-label">能不能吃</text>
-      </view>
-      <view class="bottom-nav-item" @click="onTab('shop')">
-        <text class="material-icons">shopping_basket</text>
-        <text class="bottom-nav-label">避敏商城</text>
-      </view>
-      <view class="bottom-nav-item" @click="onTab('community')">
-        <text class="material-icons">diversity_3</text>
-        <text class="bottom-nav-label">训宠社群</text>
-      </view>
-      <view class="bottom-nav-item" @click="onTab('profile')">
-        <text class="material-icons">person</text>
-        <text class="bottom-nav-label">我的</text>
-      </view>
-    </view>
   </view>
 </template>
 
 <script setup lang="ts">
+import PageNavBar from '@/components/page-nav-bar/index.vue'
+
+const mobileAvatar =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCLf1dEm0P0iLgUzCm6Qnmti5qHATwnCMx-Zd-uLiC0JGT99aIOxe9Ej2N86u0qdFnyd66NuC0B515jh_wow_pw76Ycc2iM-br7G9S3qujTnf9_zPE5BZEMdMLPmRlCNTq5EwIzQxiAEnGi_6ixKFej1cHasJDioNo3WeQ7BKF2IhIh5gwZWegCETgRQMX9LHiBr65T4tUwnbWTMD1dxw2Ki-yaRs3hXgNrMZ_xvjGXf2cD0wIm5ehfIiowmrRbcU-k_H64-ssdFrI'
+
 const onNav = (target: string) => {
   uni.showToast({ title: `导航到: ${target}`, icon: 'none' })
 }
@@ -198,9 +182,10 @@ const onRecord = () => {
   uni.showToast({ title: '记录驱虫', icon: 'none' })
 }
 
-const onTab = (target: string) => {
-  uni.showToast({ title: `切换Tab: ${target}`, icon: 'none' })
+const onNotification = () => {
+  uni.showToast({ title: '消息通知', icon: 'none' })
 }
+
 </script>
 
 <style scoped>
@@ -235,34 +220,18 @@ const onTab = (target: string) => {
   color: var(--color-on-background);
   min-height: 100vh;
   position: relative;
-  padding-bottom: 90px;
 }
 
-/* ========== Material Symbols (loaded via @font-face for H5) ========== */
-@font-face {
-  font-family: 'Material Symbols Outlined';
-  font-style: normal;
-  font-weight: 100 700;
-  src: url(https://fonts.gstatic.com/s/materialsymbolsoutlined/v219/kJF1BvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oDMzByHX9rA6RzaxHMPdY43zj-jCxv3fzvRNU22ZXGJpEpjC_1n-q_4MrImHCIJIZrDCvHeem.woff2) format('woff2');
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
-.material-icons {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.icon-fill {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+.notification-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
 }
 
 /* ========== Desktop Top Bar ========== */
@@ -321,42 +290,8 @@ const onTab = (target: string) => {
   color: var(--color-primary);
 }
 
-.nav-item-active .material-icons {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
 .top-bar-right {
   cursor: pointer;
-}
-
-.notification-icon {
-  font-size: 28px !important;
-  color: var(--color-primary);
-}
-
-/* ========== Mobile Top Bar ========== */
-.top-bar-mobile {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 20px;
-  background: var(--color-background);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
-.top-bar-mobile-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.avatar-mobile {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid rgba(94, 140, 131, 0.2);
 }
 
 /* ========== Main Content ========== */
@@ -420,8 +355,9 @@ const onTab = (target: string) => {
 }
 
 .badge-icon {
-  font-size: 14px !important;
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .profile-info {
@@ -446,8 +382,9 @@ const onTab = (target: string) => {
 }
 
 .gender-icon {
-  color: var(--color-primary);
-  font-size: 20px !important;
+  width: 20px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .profile-desc {
@@ -518,7 +455,9 @@ const onTab = (target: string) => {
 }
 
 .family-icon {
-  font-size: 20px !important;
+  width: 14px;
+  height: 15px;
+  flex-shrink: 0;
 }
 
 .family-members {
@@ -551,8 +490,9 @@ const onTab = (target: string) => {
   margin-left: -8px;
 }
 
-.member-add .material-icons {
-  font-size: 20px !important;
+.member-add-icon {
+  width: 20px;
+  height: 20px;
 }
 
 /* ========== Action Icons ========== */
@@ -600,7 +540,8 @@ const onTab = (target: string) => {
 }
 
 .action-icon-inner {
-  font-size: 32px !important;
+  width: 32px;
+  height: 32px;
 }
 
 .action-label {
@@ -641,8 +582,10 @@ const onTab = (target: string) => {
   letter-spacing: 0.02em;
 }
 
-.chevron {
-  font-size: 18px !important;
+.chevron-icon {
+  width: 6px;
+  height: 9px;
+  flex-shrink: 0;
 }
 
 .tasks-list {
@@ -668,15 +611,22 @@ const onTab = (target: string) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.task-icon {
+  width: 48px;
+  height: 48px;
 }
 
 .task-icon-done {
-  background: rgba(94, 140, 131, 0.1);
+  background: transparent;
   color: var(--color-primary);
 }
 
 .task-icon-warn {
-  background: var(--color-error-container);
+  background: transparent;
   color: var(--color-error);
 }
 
@@ -709,16 +659,15 @@ const onTab = (target: string) => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .check-icon {
-  font-size: 20px !important;
-  font-weight: bold;
+  width: 32px;
+  height: 32px;
 }
 
 .task-btn {
@@ -732,47 +681,6 @@ const onTab = (target: string) => {
   border-radius: 9999px;
 }
 
-/* ========== Bottom Navigation (Mobile) ========== */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 50;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 12px 8px;
-  background: var(--color-background);
-  border-top: 1px solid rgba(203, 214, 211, 0.3);
-}
-
-.bottom-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 4px 16px;
-  color: var(--color-grey-text);
-}
-
-.bottom-nav-active {
-  background: rgba(118, 215, 196, 0.2);
-  color: var(--color-active-text);
-  border-radius: 9999px;
-  padding: 8px 24px;
-}
-
-.bottom-nav-label {
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.bottom-nav-active .bottom-nav-label {
-  font-weight: 700;
-}
-
 /* ========== Responsive ========== */
 @media (min-width: 768px) {
   .top-bar-desktop {
@@ -784,14 +692,6 @@ const onTab = (target: string) => {
 
   .top-bar-mobile {
     display: none;
-  }
-
-  .bottom-nav {
-    display: none;
-  }
-
-  .page {
-    padding-bottom: 0;
   }
 
   .main-content {
@@ -813,10 +713,6 @@ const onTab = (target: string) => {
 @media (max-width: 767px) {
   .top-bar-desktop {
     display: none;
-  }
-
-  .top-bar-mobile {
-    display: flex;
   }
 }
 </style>

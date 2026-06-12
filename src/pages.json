@@ -1,13 +1,142 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": [
 		{
 			"path": "pages/index/index",
 			"style": {
 				"navigationStyle": "custom",
 				"navigationBarTitleText": "宠爱宝"
 			}
+		},
+		{
+			"path": "pages/food-check/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "能不能吃"
+			}
+		},
+		{
+			"path": "pages/allergy-shop/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "避敏微商城"
+			}
+		},
+		{
+			"path": "pages/training-courses/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "训宠课程"
+			}
+		},
+		{
+			"path": "pages/profile/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "我的"
+			}
 		}
 	],
+	"subPackages": [
+		{
+			"root": "extra",
+			"pages": [
+				{
+					"path": "medical-records/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "电子病历"
+					}
+				},
+				{
+					"path": "food-transition/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "7日科学换粮"
+					}
+				},
+				{
+					"path": "health-check/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "异常自查与咨询"
+					}
+				},
+				{
+					"path": "ai-pet-advisor/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "AI宠物师"
+					}
+				},
+				{
+					"path": "forgot-password/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "找回密码"
+					}
+				},
+				{
+					"path": "login/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "登录"
+					}
+				},
+				{
+					"path": "add-pet/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "添加宠物档案"
+					}
+				},
+				{
+					"path": "register/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "立即注册"
+					}
+				}
+			]
+		}
+	],
+	"tabBar": {
+		"color": "#717171",
+		"selectedColor": "#005d51",
+		"backgroundColor": "#fcf9f2",
+		"borderStyle": "black",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "首页",
+				"iconPath": "static/tabbar/home.png",
+				"selectedIconPath": "static/tabbar/home_s.png"
+			},
+			{
+				"pagePath": "pages/food-check/index",
+				"text": "能不能吃",
+				"iconPath": "static/tabbar/aiSearch.png",
+				"selectedIconPath": "static/tabbar/aiSearch_s.png"
+			},
+			{
+				"pagePath": "pages/allergy-shop/index",
+				"text": "避敏商城",
+				"iconPath": "static/tabbar/shop.png",
+				"selectedIconPath": "static/tabbar/shop_s.png"
+			},
+			{
+				"pagePath": "pages/training-courses/index",
+				"text": "训宠社群",
+				"iconPath": "static/tabbar/community.png",
+				"selectedIconPath": "static/tabbar/community_s.png"
+			},
+			{
+				"pagePath": "pages/profile/index",
+				"text": "我的",
+				"iconPath": "static/tabbar/mine.png",
+				"selectedIconPath": "static/tabbar/mine_s.png"
+			}
+		]
+	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",
