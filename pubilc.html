@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI宠物师 - 宠爱宝</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#dcdad3",
+                    "inverse-surface": "#31312c",
+                    "surface-variant": "#e5e2db",
+                    "surface-container-high": "#ebe8e1",
+                    "inverse-on-surface": "#f3f0ea",
+                    "secondary": "#246293",
+                    "on-tertiary-container": "#7b4419",
+                    "on-surface-variant": "#3e4946",
+                    "on-tertiary-fixed-variant": "#6d390e",
+                    "outline-variant": "#bdc9c5",
+                    "surface": "#fcf9f2",
+                    "secondary-container": "#8fc6fd",
+                    "surface-container": "#f0eee7",
+                    "primary-container": "#76d7c4",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#76d7c4",
+                    "on-secondary-container": "#075283",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#1c1c18",
+                    "on-tertiary-fixed": "#301400",
+                    "background": "#fcf9f2",
+                    "tertiary-fixed": "#ffdcc6",
+                    "on-primary-fixed-variant": "#005046",
+                    "primary": "#006b5d",
+                    "surface-container-low": "#f6f3ec",
+                    "surface-bright": "#fcf9f2",
+                    "on-surface": "#1c1c18",
+                    "surface-tint": "#006b5d",
+                    "secondary-fixed-dim": "#98cbff",
+                    "tertiary-fixed-dim": "#ffb785",
+                    "tertiary-container": "#ffb684",
+                    "primary-fixed": "#93f4e0",
+                    "on-primary-fixed": "#00201b",
+                    "on-secondary-fixed-variant": "#004a77",
+                    "primary-fixed-dim": "#76d7c4",
+                    "surface-container-highest": "#e5e2db",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "tertiary": "#8a5024",
+                    "on-secondary-fixed": "#001d33",
+                    "on-error": "#ffffff",
+                    "outline": "#6e7a76",
+                    "on-primary-container": "#005d51",
+                    "error-container": "#ffdad6",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#cfe5ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "stack-md": "16px",
+                    "stack-lg": "24px",
+                    "margin-page": "20px",
+                    "gutter-grid": "12px",
+                    "container-padding": "16px"
+            },
+            "fontFamily": {
+                    "label-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-lg": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["22px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #fcf9f2;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .message-bubble-ai {
+            border-bottom-left-radius: 4px;
+        }
+        .message-bubble-user {
+            border-bottom-right-radius: 4px;
+        }
+        .chat-container::-webkit-scrollbar {
+            display: none;
+        }
+        .tag-shadow {
+            box-shadow: 0 1px 0px rgba(0,0,0,0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface">
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 w-full h-16 bg-background flex justify-between items-center px-margin-page z-50">
+<button class="flex items-center justify-center w-10 h-10 hover:bg-surface-container-low rounded-full transition-colors duration-200 active:opacity-70">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md-mobile text-primary font-bold">AI宠物师</h1>
+<div class="w-10"></div> <!-- Spacer for symmetry -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex flex-col h-screen pt-16 pb-[160px]">
+<!-- Chat History Area -->
+<div class="chat-container flex-1 overflow-y-auto px-margin-page py-stack-lg space-y-stack-lg">
+<!-- AI Welcome Message -->
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="flex flex-col space-y-2 max-w-[80%]">
+<div class="bg-surface-container-lowest p-container-padding rounded-xl message-bubble-ai border-[0.5px] border-surface-variant">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                            您好！我是您的AI宠物顾问。根据档案，我看到您的毛孩子有 <span class="text-tertiary font-bold">玻璃胃</span> 和 <span class="text-tertiary font-bold">鸡肉过敏</span> 的情况。
+                        </p>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed mt-2">
+                            今天有什么我可以帮您的吗？不管是日常饮食还是健康咨询，我都在这里。
+                        </p>
+</div>
+<span class="text-[10px] text-outline ml-1">上午 10:00</span>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex flex-row-reverse items-start gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A clean, minimalist portrait of a young adult pet owner with a friendly expression, soft natural studio lighting against a warm neutral beige background, following a high-end lifestyle photography aesthetic with a focus on warmth and approachability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgfGsva-YXEjjumEmPI8CQqYTIlBgD1nY0TNxW0Rt3pqc9nZITc9KXXUs_bdSvtTC2iRmxWb3frb-OsXek9cGg_T7tKGQDnxUQJj3AlRC5PjQRn5gqdxH6l-6jj0MtuMPTxI6wtBqlQjNnWypi7cUO1V1Lqpxkh2sB9sW2PAtZw5KjnbQqxl-1FvrNlLoZXSrh604yUljWc6hCGJyEGcDVsnTrHbiqp4ZDYTrRXHLrcf8akP5pyl2kyKXAvfp-_f93yRbzEcD4wKs"/>
+</div>
+<div class="flex flex-col items-end space-y-2 max-w-[80%]">
+<div class="bg-primary text-on-primary p-container-padding rounded-xl message-bubble-user">
+<p class="font-body-md text-body-md leading-relaxed">
+                            它最近有点软便，我该怎么办？需要换粮吗？
+                        </p>
+</div>
+<span class="text-[10px] text-outline mr-1">上午 10:05</span>
+</div>
+</div>
+<!-- AI Detailed Response -->
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="flex flex-col space-y-2 max-w-[85%]">
+<div class="bg-surface-container-lowest p-container-padding rounded-xl message-bubble-ai border-[0.5px] border-surface-variant">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                            考虑到它属于<span class="bg-secondary-fixed text-on-secondary-fixed px-1 rounded">玻璃胃</span>，软便可能与应激或饮食不当有关。建议采取以下步骤：
+                        </p>
+<ul class="mt-2 space-y-2">
+<li class="flex gap-2">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<p class="font-body-md text-body-md">暂时禁食4-6小时，给肠胃减负。</p>
+</li>
+<li class="flex gap-2">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<p class="font-body-md text-body-md">补充益生菌，观察粪便形状变化。</p>
+</li>
+<li class="flex gap-2">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<p class="font-body-md text-body-md">由于它<span class="bg-tertiary-fixed text-on-tertiary-fixed px-1 rounded">鸡肉过敏</span>，换粮时请务必避开禽类蛋白。</p>
+</li>
+</ul>
+</div>
+<span class="text-[10px] text-outline ml-1">上午 10:06</span>
+</div>
+</div>
+</div>
+<!-- Bottom Controls Floating Area -->
+<div class="fixed bottom-[88px] left-0 w-full px-margin-page space-y-stack-md bg-transparent">
+<!-- Smart Suggestions Bar -->
+<div class="flex gap-stack-sm overflow-x-auto pb-2 chat-container">
+<button class="flex-shrink-0 bg-primary-container/20 text-primary border-[0.5px] border-primary/30 px-4 py-2 rounded-full font-label-lg text-label-lg tag-shadow active:scale-95 transition-transform">
+                    最近拉肚子怎么办？
+                </button>
+<button class="flex-shrink-0 bg-secondary-container/20 text-secondary border-[0.5px] border-secondary/30 px-4 py-2 rounded-full font-label-lg text-label-lg tag-shadow active:scale-95 transition-transform">
+                    换粮需要注意什么？
+                </button>
+<button class="flex-shrink-0 bg-tertiary-container/20 text-tertiary border-[0.5px] border-tertiary/30 px-4 py-2 rounded-full font-label-lg text-label-lg tag-shadow active:scale-95 transition-transform">
+                    疫苗接种提醒
+                </button>
+</div>
+<!-- Input Bar -->
+<div class="bg-surface-container-lowest p-2 rounded-full shadow-lg shadow-primary/5 flex items-center gap-2 border border-surface-variant">
+<button class="w-10 h-10 flex items-center justify-center text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<input class="flex-1 bg-surface-container-low border-none focus:ring-0 rounded-full px-4 h-10 text-body-md placeholder:text-outline-variant" placeholder="咨询AI宠物师..." type="text"/>
+<button class="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-surface-container-lowest rounded-t-lg shadow-lg shadow-primary/5">
+<!-- 首页 -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:opacity-80 scale-95 active:scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-lg text-label-lg mt-1">首页</span>
+</button>
+<!-- 健康 (Active) -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-1 scale-95 active:scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="medical_services" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+<span class="font-label-lg text-label-lg mt-1 font-bold">健康</span>
+</button>
+<!-- 动态 -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:opacity-80 scale-95 active:scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-lg text-label-lg mt-1">动态</span>
+</button>
+<!-- 我的 -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:opacity-80 scale-95 active:scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-lg text-label-lg mt-1">我的</span>
+</button>
+</nav>
+<script>
+        // Simple Interaction logic for demo
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Tactile feedback simulated by Tailwind's active:scale
+            });
+        });
+
+        // Scroll to bottom on load
+        const chatContainer = document.querySelector('.chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    </script>
+</body></html>
