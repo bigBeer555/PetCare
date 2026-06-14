@@ -1,6 +1,13 @@
 <template>
   <view class="page">
-    <PageNavBar title="AI宠物师" fixed compact title-size="44rpx" />
+    <PageNavBar
+      variant="brand"
+      title="AI宠物师"
+      sticky
+      title-size="24"
+      :avatar="mobileAvatar"
+      @notification-click="onNotification"
+    />
 
     <scroll-view
       class="chat-scroll"
@@ -102,7 +109,7 @@
           @confirm="onSend"
         />
         <view class="send-btn" @click="onSend">
-          <image class="send-icon" src="/static/svg/nav-back.svg" mode="aspectFit" />
+          <image class="send-icon" src="/static/svg/send-message.svg" mode="aspectFit" />
         </view>
       </view>
     </view>
@@ -113,6 +120,9 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import PageNavBar from '@/components/page-nav-bar/index.vue'
+
+const mobileAvatar =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCLf1dEm0P0iLgUzCm6Qnmti5qHATwnCMx-Zd-uLiC0JGT99aIOxe9Ej2N86u0qdFnyd66NuC0B515jh_wow_pw76Ycc2iM-br7G9S3qujTnf9_zPE5BZEMdMLPmRlCNTq5EwIzQxiAEnGi_6ixKFej1cHasJDioNo3WeQ7BKF2IhIh5gwZWegCETgRQMX9LHiBr65T4tUwnbWTMD1dxw2Ki-yaRs3hXgNrMZ_xvjGXf2cD0wIm5ehfIiowmrRbcU-k_H64-ssdFrI'
 
 const userAvatar =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuCgfGsva-YXEjjumEmPI8CQqYTIlBgD1nY0TNxW0Rt3pqc9nZITc9KXXUs_bdSvtTC2iRmxWb3frb-OsXek9cGg_T7tKGQDnxUQJj3AlRC5PjQRn5gqdxH6l-6jj0MtuMPTxI6wtBqlQjNnWypi7cUO1V1Lqpxkh2sB9sW2PAtZw5KjnbQqxl-1FvrNlLoZXSrh604yUljWc6hCGJyEGcDVsnTrHbiqp4ZDYTrRXHLrcf8akP5pyl2kyKXAvfp-_f93yRbzEcD4wKs'
@@ -136,6 +146,10 @@ const scrollToBottom = () => {
   nextTick(() => {
     scrollTop.value = 99999
   })
+}
+
+const onNotification = () => {
+  uni.showToast({ title: '消息通知', icon: 'none' })
 }
 
 const onSuggestion = (text: string) => {
@@ -195,13 +209,12 @@ onMounted(scrollToBottom)
 .chat-scroll {
   flex: 1;
   height: 0;
-  padding-top: calc(96rpx + env(safe-area-inset-top));
   padding-bottom: 200rpx;
   box-sizing: border-box;
 }
 
 .chat-list {
-  padding: 48rpx 40rpx;
+  padding: 32rpx 40rpx 48rpx;
   display: flex;
   flex-direction: column;
   gap: 48rpx;
@@ -344,7 +357,7 @@ onMounted(scrollToBottom)
   right: 0;
   bottom: 0;
   z-index: 40;
-  padding: 0 40rpx calc(24rpx + env(safe-area-inset-bottom));
+  padding: 0 40rpx 24rpx;
   display: flex;
   flex-direction: column;
   gap: 32rpx;
@@ -441,6 +454,5 @@ onMounted(scrollToBottom)
 .send-icon {
   width: 36rpx;
   height: 36rpx;
-  transform: rotate(180deg);
 }
 </style>

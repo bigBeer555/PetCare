@@ -75,6 +75,12 @@
   </view>
 </template>
 
+<script lang="ts">
+export default {
+  name: 'PageNavBar',
+}
+</script>
+
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
@@ -287,17 +293,17 @@ const handleNotification = () => {
 
 .page-nav-bar--compact .page-nav-bar__back,
 .page-nav-bar--compact .page-nav-bar__placeholder {
-  width: 64rpx;
-  height: 64rpx;
+  width: 80rpx;
+  height: 80rpx;
 }
 
 .page-nav-bar--compact .page-nav-bar__back-icon {
-  width: 40rpx;
-  height: 40rpx;
+  width: 80rpx;
+  height: 80rpx;
 }
 
 .page-nav-bar--compact .page-nav-bar__right {
-  min-width: 64rpx;
+  min-width: 80rpx;
 }
 
 .page-nav-bar--fixed {
@@ -352,8 +358,8 @@ const handleNotification = () => {
 }
 
 .page-nav-bar__back-icon {
-  width: 64rpx;
-  height: 64rpx;
+  width: 80rpx;
+  height: 80rpx;
 }
 
 .page-nav-bar__title {

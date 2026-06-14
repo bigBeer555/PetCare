@@ -38,40 +38,42 @@
     <!-- Mobile TopAppBar -->
     <PageNavBar
       variant="brand"
-      title="宠爱宝"
+      :title="navTitle"
       mobile-only
       sticky
       title-size="24"
-      :avatar="mobileAvatar"
+      :avatar="navAvatar"
       @notification-click="onNotification"
     />
 
     <!-- Main Content -->
     <view class="main-content">
       <!-- Profile Header -->
-      <view class="profile-section">
+      <view v-if="homePet" class="profile-section">
         <view class="profile-avatar-wrapper">
           <view class="profile-avatar">
-            <image class="avatar-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIZe8qidozdJHcI6HDQml-BV2Y3f-g78oo3wD_genNQNnYT025KzVeZi8JtDJEhMFrA6V2kRInY6vGSN76uS2RoK3S_rPsa9fVQ1RJXfVmPP7nOkXta-tP0O2UKFf5L4_E6LNUH6Slq0C1NB2cOPHr7nzoW2V0t-ZVlPHfX8jmhakTIll-1KX6JwKelEVwixR-LzcUtQORRz3soF_-vIV2qVb0HA8cFeFqEUBmnuH7lDxOTXxuv2NIZZpArLCN8brwaKpyn-EIX1Y" />
+            <image class="avatar-img" :src="homePet.avatar" mode="aspectFill" />
           </view>
-          <view class="badge-puppy">
-            <image class="badge-icon" src="/static/svg/cate-label.svg" mode="aspectFit" />
-            <text>幼犬</text>
+          <view v-if="homePet.badgeLabel" class="badge-puppy">
+            <image class="badge-icon" :src="homePet.badgeIcon" mode="aspectFit" />
+            <text>{{ homePet.badgeLabel }}</text>
           </view>
         </view>
         <view class="profile-info">
           <view class="profile-name-row">
-            <text class="profile-name">跳跳</text>
+            <text class="profile-name">{{ homePet.name }}</text>
             <image class="gender-icon" src="/static/svg/gender.svg" mode="aspectFit" />
           </view>
-          <text class="profile-desc">杰克罗素梗 · 8个月 · 6.5kg</text>
+          <text class="profile-desc">{{ homePet.desc }}</text>
         </view>
         <!-- Tags -->
-        <view class="tags-row">
-          <text class="tag tag-primary">玻璃胃</text>
-          <text class="tag tag-error">鸡肉过敏</text>
-          <text class="tag tag-secondary">幼犬</text>
-          <text class="tag tag-muted">不爱喝水</text>
+        <view v-if="homePet.tags.length" class="tags-row">
+          <text
+            v-for="tag in homePet.tags"
+            :key="tag.label"
+            class="tag"
+            :class="tag.className"
+          >{{ tag.label }}</text>
         </view>
         <!-- Family Sharing -->
         <view class="family-row">
@@ -86,6 +88,18 @@
               <image class="member-add-icon" src="/static/svg/add-label.svg" mode="aspectFit" />
             </view>
           </view>
+        </view>
+      </view>
+
+      <view v-else class="profile-section profile-section--empty" @click="onAddPet">
+        <view class="profile-avatar-wrapper">
+          <view class="profile-avatar profile-avatar--empty">
+            <image class="avatar-img" src="/static/svg/animal-paw.svg" mode="aspectFit" />
+          </view>
+        </view>
+        <view class="profile-info">
+          <text class="profile-name">暂无默认宠物</text>
+          <text class="profile-desc">添加宠物并设为默认后，将在此展示</text>
         </view>
       </view>
 
@@ -161,10 +175,46 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import PageNavBar from '@/components/page-nav-bar/index.vue'
+import { refreshDefaultPet, defaultPetRef } from '@/utils/default-pet'
+import { mapPetToHomeDisplay } from '@/utils/pet-mapper'
+import { ensureLoggedIn, handleApiError } from '@/utils/auth'
+import { isLoggedIn } from '@/utils/storage'
 
-const mobileAvatar =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuCLf1dEm0P0iLgUzCm6Qnmti5qHATwnCMx-Zd-uLiC0JGT99aIOxe9Ej2N86u0qdFnyd66NuC0B515jh_wow_pw76Ycc2iM-br7G9S3qujTnf9_zPE5BZEMdMLPmRlCNTq5EwIzQxiAEnGi_6ixKFej1cHasJDioNo3WeQ7BKF2IhIh5gwZWegCETgRQMX9LHiBr65T4tUwnbWTMD1dxw2Ki-yaRs3hXgNrMZ_xvjGXf2cD0wIm5ehfIiowmrRbcU-k_H64-ssdFrI'
+const homePet = computed(() =>
+  defaultPetRef.value ? mapPetToHomeDisplay(defaultPetRef.value) : null,
+)
+
+const navTitle = computed(() => homePet.value?.name || '宠爱宝')
+const navAvatar = computed(() => homePet.value?.avatar || '')
+
+const loadHomePet = async () => {
+  if (!isLoggedIn()) {
+    defaultPetRef.value = null
+    return
+  }
+
+  try {
+    await refreshDefaultPet()
+  } catch (error) {
+    handleApiError(error, '加载默认宠物失败')
+  }
+}
+
+onLoad(() => {
+  loadHomePet()
+})
+
+onShow(() => {
+  loadHomePet()
+})
+
+const onAddPet = () => {
+  if (!ensureLoggedIn()) return
+  uni.navigateTo({ url: '/extra/add-pet/index' })
+}
 
 const onNav = (target: string) => {
   uni.showToast({ title: `导航到: ${target}`, icon: 'none' })
@@ -315,6 +365,23 @@ const onNotification = () => {
   flex-direction: column;
   align-items: center;
   border: 1px solid rgba(203, 214, 211, 0.3);
+}
+
+.profile-section--empty {
+  cursor: pointer;
+}
+
+.profile-avatar--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-container);
+}
+
+.profile-avatar--empty .avatar-img {
+  width: 56px;
+  height: 56px;
+  opacity: 0.5;
 }
 
 .profile-avatar-wrapper {

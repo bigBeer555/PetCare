@@ -1,35 +1,36 @@
 <template>
   <view class="page">
-    <view class="top-bar">
-      <view class="top-bar-left">
-        <text class="material-icons icon-fill brand-icon">pets</text>
-        <text class="brand-title">宠爱宝</text>
-      </view>
-      <view class="top-bar-right">
-        <view class="icon-btn" @click="onNotification">
-          <text class="material-icons">notifications</text>
+    <PageNavBar
+      variant="brand"
+      :title="navTitle"
+      sticky
+      title-size="24"
+      :avatar="navAvatar"
+    >
+      <template #right>
+        <view class="nav-actions">
+          <view class="nav-action-btn" @click.stop="onNotification">
+            <image class="nav-action-icon" src="/static/svg/message.svg" mode="aspectFit" />
+          </view>
+          <view class="nav-action-btn" @click.stop="onSettings">
+            <image class="nav-action-icon" src="/static/svg/settings.svg" mode="aspectFit" />
+          </view>
         </view>
-        <view class="icon-btn" @click="onSettings">
-          <text class="material-icons">settings</text>
-        </view>
-      </view>
-    </view>
+      </template>
+    </PageNavBar>
 
     <view class="main-content">
-      <view class="profile-section">
-        <image
-          class="user-avatar"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYAsCG7wotY1r9MFn-eeL1qC0JDe6CumJj50s1BDG_roN1wEhWwcWfC1zPtEyFfQiZwmk2JrPbYB2Q-kTLx5KvNUJ-ORXYBOCDRAOGMghIQvq-pqhwDObzvRkZ5vxZg3JKpFgxeJFLnlKiH3G8UH-CYbThADi4ZB6vrQaM0QJXVigwGLLKyM8As398H0ZG90VqJfLTN7U2Dbwr2Hiojoh84Y1vef5S4VHW1_zf88gO5vDBz-hisHo1kduDt_BnEolDEnVveoFZh0Y"
-        />
+      <view class="profile-section" @click="onProfileTap">
+        <image class="user-avatar" mode="aspectFit" :src="userAvatar" />
         <view class="user-info">
           <view class="user-name-row">
-            <text class="user-name">林小暖</text>
-            <view class="level-badge">
-              <text class="material-icons icon-fill level-icon">stars</text>
+            <text class="user-name">{{ userName }}</text>
+            <view v-if="loggedIn" class="level-badge">
+              <image class="level-icon" src="/static/svg/level-star.svg" mode="aspectFit" />
               <text>LV.3</text>
             </view>
           </view>
-          <text class="user-bio">爱狗狗，也爱生活。每一天都要陪布丁去草坪跑跑～</text>
+          <text class="user-bio">{{ userBio }}</text>
         </view>
       </view>
 
@@ -45,7 +46,7 @@
           <text class="section-title">宠物档案</text>
           <view class="manage-btn" @click="onManagePets">
             <text>管理</text>
-            <text class="material-icons chevron">chevron_right</text>
+            <image class="chevron-icon" src="/static/svg/manage-more.svg" mode="aspectFit" />
           </view>
         </view>
         <scroll-view class="pets-scroll" scroll-x :show-scrollbar="false">
@@ -56,10 +57,10 @@
               <text class="pet-desc">{{ pet.desc }}</text>
               <text class="pet-tag" :class="pet.tagClass">{{ pet.tag }}</text>
             </view>
-            <view class="add-pet-btn" @click="onAddPet">
-              <text class="material-icons">add_circle</text>
+            <!-- <view class="add-pet-btn" @click="onAddPet">
+              <image class="add-pet-icon" src="/static/svg/add-label.svg" mode="aspectFit" />
               <text class="add-pet-text">添加宠物</text>
-            </view>
+            </view> -->
           </view>
         </scroll-view>
       </view>
@@ -72,7 +73,7 @@
           @click="onFunction(fn.id)"
         >
           <view class="function-icon" :class="fn.bgClass">
-            <text class="material-icons icon-fill" :class="fn.colorClass">{{ fn.icon }}</text>
+            <image class="function-icon-img" :src="fn.icon" mode="aspectFit" />
           </view>
           <text class="function-label">{{ fn.label }}</text>
         </view>
@@ -86,10 +87,10 @@
           @click="onMenu(item.id)"
         >
           <view class="menu-left">
-            <text class="material-icons menu-icon">{{ item.icon }}</text>
+            <image class="menu-icon" :src="item.icon" mode="aspectFit" />
             <text class="menu-label">{{ item.label }}</text>
           </view>
-          <text class="material-icons menu-arrow">chevron_right</text>
+          <image class="menu-arrow" src="/static/svg/item-arrow-right.svg" mode="aspectFit" />
         </view>
       </view>
     </view>
@@ -98,6 +99,30 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
+import PageNavBar from '@/components/page-nav-bar/index.vue'
+import { getAuthMe } from '@/api/auth'
+import { fetchPets } from '@/api/pets'
+import { ensureLoggedIn, handleApiError } from '@/utils/auth'
+import { defaultPetRef, syncDefaultPetFromList } from '@/utils/default-pet'
+import { getPetAvatarUrl, mapPetToProfileCard } from '@/utils/pet-mapper'
+import { getStoredUser, isLoggedIn } from '@/utils/storage'
+
+const DEFAULT_AVATAR =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuAYAsCG7wotY1r9MFn-eeL1qC0JDe6CumJj50s1BDG_roN1wEhWwcWfC1zPtEyFfQiZwmk2JrPbYB2Q-kTLx5KvNUJ-ORXYBOCDRAOGMghIQvq-pqhwDObzvRkZ5vxZg3JKpFgxeJFLnlKiH3G8UH-CYbThADi4ZB6vrQaM0QJXVigwGLLKyM8As398H0ZG90VqJfLTN7U2Dbwr2Hiojoh84Y1vef5S4VHW1_zf88gO5vDBz-hisHo1kduDt_BnEolDEnVveoFZh0Y'
+
+const loggedIn = ref(false)
+const userName = ref('未登录')
+const userBio = ref('登录后可同步您的宠物档案')
+const userAvatar = ref(DEFAULT_AVATAR)
+const navTitle = computed(() => defaultPetRef.value?.name || '宠爱宝')
+const navAvatar = computed(() =>
+  defaultPetRef.value ? getPetAvatarUrl(defaultPetRef.value) : '',
+)
+
+const pets = ref<ReturnType<typeof mapPetToProfileCard>[]>([])
+
 const stats = [
   { value: '1.2k', label: '获赞' },
   { value: '358', label: '粉丝' },
@@ -105,45 +130,74 @@ const stats = [
   { value: '15', label: '发帖' },
 ]
 
-const pets = [
-  {
-    id: 1,
-    name: '布丁',
-    desc: '金毛 · 2岁',
-    tag: '疫苗已打',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDp5eWXHUzzsQLNTckgxaXjRDQAU6-uJnPLfx8uJ0lnbxvOxJhMeQYXE-FaS0GK159ZtXCm3gMIOdl4IlvluGZdmRKd5tOQl8YW-XiJupP-bQct4Hk2HxffTKsWzqCZyO6AlEZEfARYqf4cpW5CeMGNiw6O19edyJKZo7PCtyBIFB0WbSlzjqTbIoJJ2cMuObuXhGIYzOpjbYRu9ptOdTxr1zSPn2CCBzvLa3LB4FBX-KAoGV-WIohmCnfGqPSdPiqTZsTds4o0nng',
-    borderClass: 'border-primary',
-    tagClass: 'tag-secondary',
-  },
-  {
-    id: 2,
-    name: '雪球',
-    desc: '布偶 · 1岁',
-    tag: '驱虫已做',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDNFslBUwpMrXlvbuU8DXMatwHy5TQXPnNy226rjYr0BACnwYEVDAt3JePh29GhnvcSgMfjDlz24my0UQUbbqZbgL1f0GQNrmevdCRNtynFxY7BMiY6ctddHPth25bFnSECuIc7c8qCy43KfLW7iar2qP4l_m8jdCptqvXGxaqo5WCpLiPH5VaPubj0IYzF2duwz67G2GrV2nzyFNP1Gkt6VndOR7PxUZB09gXcAe_SsSaKmZhdDgz4N-He9bsm5ZWVcbHQCZw6wps',
-    borderClass: 'border-tertiary',
-    tagClass: 'tag-tertiary',
-  },
-]
-
 const functions = [
-  { id: 'orders', label: '订单管理', icon: 'package_2', bgClass: 'bg-secondary', colorClass: 'color-secondary' },
-  { id: 'appointment', label: '预约挂号', icon: 'event_available', bgClass: 'bg-primary', colorClass: 'color-primary' },
-  { id: 'schedule', label: '课程表', icon: 'calendar_month', bgClass: 'bg-tertiary', colorClass: 'color-tertiary' },
+  { id: 'orders', label: '订单管理', icon: '/static/svg/order.svg', bgClass: 'bg-secondary' },
+  { id: 'appointment', label: '预约挂号', icon: '/static/svg/calendar.svg', bgClass: 'bg-primary' },
+  { id: 'schedule', label: '课程表', icon: '/static/svg/class-form.svg', bgClass: 'bg-tertiary' },
 ]
 
 const menuItems = [
-  { id: 'favorites', label: '我的收藏', icon: 'favorite' },
-  { id: 'posts', label: '我的动态', icon: 'chat_bubble' },
-  { id: 'address', label: '地址管理', icon: 'location_on' },
-  { id: 'help', label: '帮助与反馈', icon: 'help' },
-  { id: 'service', label: '联系客服', icon: 'support_agent' },
+  { id: 'favorites', label: '我的收藏', icon: '/static/svg/collection.svg' },
+  { id: 'posts', label: '我的动态', icon: '/static/svg/dynamic.svg' },
+  { id: 'address', label: '地址管理', icon: '/static/svg/address.svg' },
+  { id: 'help', label: '帮助与反馈', icon: '/static/svg/feedback.svg' },
+  { id: 'service', label: '联系客服', icon: '/static/svg/customer-service.svg' },
 ]
+
+const applyGuestState = () => {
+  loggedIn.value = false
+  userName.value = '未登录'
+  userBio.value = '登录后可同步您的宠物档案'
+  userAvatar.value = DEFAULT_AVATAR
+  pets.value = []
+  defaultPetRef.value = null
+}
+
+const loadProfile = async () => {
+  if (!isLoggedIn()) {
+    const cached = getStoredUser()
+    if (cached) {
+      userName.value = cached.nickname || '微信用户'
+      userAvatar.value = cached.avatarUrl || DEFAULT_AVATAR
+    } else {
+      applyGuestState()
+    }
+    return
+  }
+
+  loggedIn.value = true
+  try {
+    const [user, petList] = await Promise.all([getAuthMe(), fetchPets()])
+    userName.value = user.nickname || '微信用户'
+    userBio.value = '爱宠物，更爱生活'
+    userAvatar.value = user.avatarUrl || DEFAULT_AVATAR
+    pets.value = petList.map(mapPetToProfileCard)
+    syncDefaultPetFromList(petList)
+  } catch (error) {
+    handleApiError(error, '加载资料失败')
+  }
+}
+
+onShow(() => {
+  loadProfile()
+})
+
+const onProfileTap = () => {
+  if (!loggedIn.value) {
+    uni.navigateTo({ url: '/extra/login/index' })
+  }
+}
 
 const onNotification = () => uni.showToast({ title: '通知', icon: 'none' })
 const onSettings = () => uni.showToast({ title: '设置', icon: 'none' })
-const onManagePets = () => uni.showToast({ title: '管理宠物档案', icon: 'none' })
-const onAddPet = () => uni.navigateTo({ url: '/extra/add-pet/index' })
+const onManagePets = () => {
+  if (!ensureLoggedIn()) return
+  uni.navigateTo({ url: '/extra/pet-list/index' })
+}
+const onAddPet = () => {
+  if (!ensureLoggedIn()) return
+  uni.navigateTo({ url: '/extra/add-pet/index' })
+}
 const onFunction = (id: string) => uni.showToast({ title: id, icon: 'none' })
 const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
 </script>
@@ -181,68 +235,25 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
   min-height: 100vh;
 }
 
-@font-face {
-  font-family: 'Material Symbols Outlined';
-  font-style: normal;
-  font-weight: 100 700;
-  src: url(https://fonts.gstatic.com/s/materialsymbolsoutlined/v219/kJF1BvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oDMzByHX9rA6RzaxHMPdY43zj-jCxv3fzvRNU22ZXGJpEpjC_1n-q_4MrImHCIJIZrDCvHeem.woff2) format('woff2');
-}
-
-.material-icons {
-  font-family: 'Material Symbols Outlined';
-  font-size: 48rpx;
-  line-height: 1;
-  display: inline-block;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.icon-fill {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 128rpx;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40rpx;
-  background: var(--color-surface);
-  border-bottom: 2rpx solid var(--color-outline-variant);
-  box-sizing: border-box;
-}
-
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.brand-icon {
-  color: var(--color-primary);
-}
-
-.brand-title {
-  font-size: 48rpx;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.top-bar-right {
-  display: flex;
-  gap: 32rpx;
-}
-
-.icon-btn {
-  color: var(--color-on-surface-variant);
-}
-
 .main-content {
-  padding: 160rpx 40rpx 48rpx;
+  padding: 32rpx 40rpx 48rpx;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.nav-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-action-icon {
+  width: 56rpx;
+  height: 56rpx;
 }
 
 .profile-section {
@@ -291,7 +302,9 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
 }
 
 .level-icon {
-  font-size: 24rpx !important;
+  width: 24rpx;
+  height: 24rpx;
+  flex-shrink: 0;
 }
 
 .user-bio {
@@ -354,8 +367,10 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
   font-weight: 600;
 }
 
-.chevron {
-  font-size: 32rpx !important;
+.chevron-icon {
+  width: 10rpx;
+  height: 16rpx;
+  margin-left: 4rpx;
 }
 
 .pets-scroll {
@@ -370,7 +385,7 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
 }
 
 .pet-card {
-  min-width: 400rpx;
+  min-width: 320rpx;
   background: #fff;
   padding: 32rpx;
   border-radius: 24rpx;
@@ -441,6 +456,11 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
   flex-shrink: 0;
 }
 
+.add-pet-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
 .add-pet-text {
   font-size: 24rpx;
   font-weight: 600;
@@ -482,16 +502,9 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
   background: var(--color-tertiary-fixed);
 }
 
-.color-secondary {
-  color: var(--color-secondary);
-}
-
-.color-primary {
-  color: var(--color-primary);
-}
-
-.color-tertiary {
-  color: var(--color-tertiary);
+.function-icon-img {
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .function-label {
@@ -525,7 +538,9 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
 }
 
 .menu-icon {
-  color: var(--color-on-surface-variant);
+  width: 40rpx;
+  height: 40rpx;
+  flex-shrink: 0;
 }
 
 .menu-label {
@@ -534,6 +549,8 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
 }
 
 .menu-arrow {
-  color: var(--color-outline-variant);
+  width: 24rpx;
+  height: 24rpx;
+  flex-shrink: 0;
 }
 </style>

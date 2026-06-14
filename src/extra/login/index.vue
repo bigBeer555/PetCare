@@ -95,9 +95,11 @@
 
     <view class="footer">
       <view class="agreement-row" @click="agreed = !agreed">
-        <view class="checkbox" :class="{ 'checkbox-checked': agreed }">
-          <text v-if="agreed" class="material-icons check-icon">check</text>
-        </view>
+        <image
+          class="agreement-icon"
+          :src="agreed ? '/static/svg/agreement_s.svg' : '/static/svg/agreement_n.svg'"
+          mode="aspectFit"
+        />
         <text class="agreement-text">
           我已阅读并同意
           <text class="agreement-link">《用户协议》</text>
@@ -112,19 +114,21 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { loginWithWechat, handleApiError } from '@/utils/auth'
 
 const loginType = ref<'password' | 'code'>('password')
 const account = ref('')
 const credential = ref('')
 const showPassword = ref(false)
 const agreed = ref(false)
+const loggingIn = ref(false)
 
 const onLogin = () => {
   if (!agreed.value) {
     uni.showToast({ title: '请先同意用户协议', icon: 'none' })
     return
   }
-  uni.showToast({ title: '登录成功', icon: 'success' })
+  uni.showToast({ title: '密码/验证码登录暂未开放', icon: 'none' })
 }
 
 const onForgotPassword = () => {
@@ -135,12 +139,29 @@ const onRegister = () => {
   uni.navigateTo({ url: '/extra/register/index' })
 }
 
-const onWechatLogin = () => {
-  uni.showToast({ title: '微信登录', icon: 'none' })
+const onWechatLogin = async () => {
+  if (!agreed.value) {
+    uni.showToast({ title: '请先同意用户协议', icon: 'none' })
+    return
+  }
+  if (loggingIn.value) return
+
+  loggingIn.value = true
+  try {
+    await loginWithWechat()
+    uni.showToast({ title: '登录成功', icon: 'success' })
+    setTimeout(() => {
+      uni.navigateBack({ fail: () => uni.switchTab({ url: '/pages/profile/index' }) })
+    }, 400)
+  } catch (error) {
+    handleApiError(error, '微信登录失败')
+  } finally {
+    loggingIn.value = false
+  }
 }
 
 const onAppleLogin = () => {
-  uni.showToast({ title: 'Apple 登录', icon: 'none' })
+  uni.showToast({ title: 'Apple 登录暂未开放', icon: 'none' })
 }
 </script>
 
@@ -167,25 +188,6 @@ const onAppleLogin = () => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-}
-
-@font-face {
-  font-family: 'Material Symbols Outlined';
-  font-style: normal;
-  font-weight: 100 700;
-  src: url(https://fonts.gstatic.com/s/materialsymbolsoutlined/v219/kJF1BvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oDMzByHX9rA6RzaxHMPdY43zj-jCxv3fzvRNU22ZXGJpEpjC_1n-q_4MrImHCIJIZrDCvHeem.woff2) format('woff2');
-}
-
-.material-icons {
-  font-family: 'Material Symbols Outlined';
-  font-size: 48rpx;
-  line-height: 1;
-  display: inline-block;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.icon-fill {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 .brand-header {
@@ -394,26 +396,11 @@ const onAppleLogin = () => {
   margin: 0 auto;
 }
 
-.checkbox {
-  width: 32rpx;
-  height: 32rpx;
-  border-radius: 8rpx;
-  border: 2rpx solid var(--color-outline-variant);
-  margin-top: 4rpx;
+.agreement-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-top: 2rpx;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.checkbox-checked {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-.check-icon {
-  font-size: 24rpx !important;
-  color: #fff;
 }
 
 .agreement-text {

@@ -8,6 +8,13 @@
 			}
 		},
 		{
+			"path": "pages/ai-pet-advisor/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "AI宠物师"
+			}
+		},
+		{
 			"path": "pages/food-check/index",
 			"style": {
 				"navigationStyle": "custom",
@@ -19,6 +26,13 @@
 			"style": {
 				"navigationStyle": "custom",
 				"navigationBarTitleText": "避敏微商城"
+			}
+		},
+		{
+			"path": "pages/pet-community/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "训宠社区"
 			}
 		},
 		{
@@ -62,13 +76,6 @@
 					}
 				},
 				{
-					"path": "ai-pet-advisor/index",
-					"style": {
-						"navigationStyle": "custom",
-						"navigationBarTitleText": "AI宠物师"
-					}
-				},
-				{
 					"path": "forgot-password/index",
 					"style": {
 						"navigationStyle": "custom",
@@ -87,6 +94,13 @@
 					"style": {
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "添加宠物档案"
+					}
+				},
+				{
+					"path": "pet-list/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "宠物档案管理"
 					}
 				},
 				{
@@ -112,8 +126,8 @@
 				"selectedIconPath": "static/tabbar/home_s.png"
 			},
 			{
-				"pagePath": "pages/food-check/index",
-				"text": "能不能吃",
+				"pagePath": "pages/ai-pet-advisor/index",
+				"text": "Ai知宠",
 				"iconPath": "static/tabbar/aiSearch.png",
 				"selectedIconPath": "static/tabbar/aiSearch_s.png"
 			},
@@ -124,8 +138,8 @@
 				"selectedIconPath": "static/tabbar/shop_s.png"
 			},
 			{
-				"pagePath": "pages/training-courses/index",
-				"text": "训宠社群",
+				"pagePath": "pages/pet-community/index",
+				"text": "社区",
 				"iconPath": "static/tabbar/community.png",
 				"selectedIconPath": "static/tabbar/community_s.png"
 			},

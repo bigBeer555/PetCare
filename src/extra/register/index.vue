@@ -112,14 +112,11 @@
 
       <view class="footer">
         <view class="agreement-row" @click="agreed = !agreed">
-          <view class="checkbox" :class="{ 'checkbox-checked': agreed }">
-            <image
-              v-if="agreed"
-              class="check-icon"
-              src="/static/svg/btn-success.svg"
-              mode="aspectFit"
-            />
-          </view>
+          <image
+            class="agreement-icon"
+            :src="agreed ? '/static/svg/agreement_s.svg' : '/static/svg/agreement_n.svg'"
+            mode="aspectFit"
+          />
           <text class="agreement-text">
             我已阅读并同意
             <text class="agreement-link">《用户协议》</text>
@@ -244,12 +241,12 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   justify-content: center;
-  padding: 64rpx 0;
+  padding: 42rpx 0;
 }
 
 .hero-image-wrap {
-  width: 384rpx;
-  height: 384rpx;
+  width: 347rpx;
+  height: 347rpx;
   border-radius: 50%;
   overflow: hidden;
   border: 4rpx solid var(--color-surface-variant);
@@ -434,26 +431,10 @@ onUnmounted(() => {
   max-width: 560rpx;
 }
 
-.checkbox {
-  width: 32rpx;
-  height: 32rpx;
-  border-radius: 8rpx;
-  border: 2rpx solid var(--color-outline-variant);
-  margin-top: 4rpx;
+.agreement-icon {
+  width: 40rpx;
+  height: 40rpx;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.checkbox-checked {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-.check-icon {
-  width: 24rpx;
-  height: 24rpx;
 }
 
 .agreement-text {

@@ -1,25 +1,37 @@
 <template>
   <view class="page">
-    <view class="top-bar">
-      <view class="back-btn" @click="onBack">
-        <text class="material-icons">arrow_back</text>
-      </view>
-      <text class="page-title">添加宠物档案</text>
-      <view class="top-spacer" />
-    </view>
+    <PageNavBar
+      :title="pageTitle"
+      fixed
+      bordered
+      compact
+      title-size="22"
+      :auto-back="false"
+      @back="onBack"
+    />
 
     <view class="main-content">
       <view class="upload-section" @click="onUploadPhoto">
-        <view class="upload-circle">
-          <text class="material-icons upload-icon">add_a_photo</text>
-          <text class="upload-text">上传照片</text>
+        <view class="upload-circle" :class="{ 'upload-circle--filled': !!avatarPreview }">
+          <image
+            v-if="avatarPreview"
+            class="upload-preview"
+            :src="avatarPreview"
+            mode="aspectFill"
+          />
+          <template v-else>
+            <image class="upload-icon" src="/static/svg/upload.svg" mode="aspectFit" />
+            <text class="upload-text">上传照片</text>
+          </template>
         </view>
       </view>
 
       <view class="form-card">
         <view class="form-group">
           <text class="form-label">宠物名字</text>
-          <input v-model="petName" class="soft-input" type="text" placeholder="例如：毛豆" />
+          <view class="soft-input-wrap">
+            <input v-model="petName" class="soft-input-field" type="text" placeholder="例如：毛豆" />
+          </view>
         </view>
 
         <view class="form-group">
@@ -32,7 +44,11 @@
               :class="{ 'type-btn-active': petType === type.id }"
               @click="petType = type.id"
             >
-              <text class="material-icons" :class="{ 'icon-fill': petType === type.id }">{{ type.icon }}</text>
+              <image
+                class="type-icon"
+                :src="getSvgIconSrc(getTypeIconName(type.id), petType === type.id)"
+                mode="aspectFit"
+              />
               <text>{{ type.label }}</text>
             </view>
           </view>
@@ -41,9 +57,9 @@
         <view class="form-row">
           <view class="form-group form-half">
             <text class="form-label">品种</text>
-            <view class="input-with-icon">
-              <input v-model="breed" class="soft-input" type="text" placeholder="请选择" />
-              <text class="material-icons field-icon">expand_more</text>
+            <view class="soft-input-wrap input-with-icon">
+              <input v-model="breed" class="soft-input-field soft-input-field--icon" type="text" placeholder="请选择" />
+              <image class="field-icon" src="/static/svg/down-select.svg" mode="aspectFit" />
             </view>
           </view>
           <view class="form-group form-half">
@@ -51,18 +67,26 @@
             <view class="gender-switch">
               <view
                 class="gender-btn"
-                :class="{ 'gender-active': gender === 'male' }"
+                :class="{ 'gender-active gender-active-male': gender === 'male' }"
                 @click="gender = 'male'"
               >
-                <text class="material-icons gender-icon">male</text>
+                <image
+                  class="gender-icon"
+                  :src="getSvgIconSrc('male', gender === 'male', GENDER_ICON_ACTIVE.male)"
+                  mode="aspectFit"
+                />
                 <text>弟弟</text>
               </view>
               <view
                 class="gender-btn"
-                :class="{ 'gender-active': gender === 'female' }"
+                :class="{ 'gender-active gender-active-female': gender === 'female' }"
                 @click="gender = 'female'"
               >
-                <text class="material-icons gender-icon">female</text>
+                <image
+                  class="gender-icon"
+                  :src="getSvgIconSrc('female', gender === 'female', GENDER_ICON_ACTIVE.female)"
+                  mode="aspectFit"
+                />
                 <text>妹妹</text>
               </view>
             </view>
@@ -73,19 +97,32 @@
           <view class="form-group form-half">
             <text class="form-label">生日</text>
             <picker mode="date" :value="birthday" @change="onBirthdayChange">
-              <view class="input-with-icon">
-                <text class="soft-input picker-text">{{ birthday || '选择日期' }}</text>
-                <text class="material-icons field-icon">calendar_today</text>
+              <view class="soft-input-wrap input-with-icon">
+                <text
+                  class="soft-input-field picker-text"
+                  :class="{ 'picker-text--placeholder': !birthday }"
+                >{{ birthday || 'yy/mm/dd' }}</text>
+                <image class="field-icon" src="/static/svg/calendar.svg" mode="aspectFit" />
               </view>
             </picker>
           </view>
           <view class="form-group form-half">
             <text class="form-label">体重</text>
-            <view class="input-with-suffix">
-              <input v-model="weight" class="soft-input" type="digit" placeholder="0.0" />
+            <view class="soft-input-wrap input-with-suffix">
+              <input v-model="weight" class="soft-input-field soft-input-field--suffix" type="digit" placeholder="0.0" />
               <text class="suffix">kg</text>
             </view>
           </view>
+        </view>
+      </view>
+
+      <view class="form-card default-card">
+        <view class="default-row">
+          <view class="default-copy">
+            <text class="default-title">设为默认宠物</text>
+            <text class="default-desc">首页与顶部导航将展示该宠物头像和昵称</text>
+          </view>
+          <switch :checked="isDefault" color="#006b5d" @change="onDefaultChange" />
         </view>
       </view>
 
@@ -99,13 +136,19 @@
             v-for="tag in tags"
             :key="tag.id"
             class="tag-item"
-            :class="[tag.styleClass, { 'tag-selected': selectedTags.includes(tag.id) }]"
+            :class="[
+              tag.styleClass,
+              { 'tag-selected': selectedTags.includes(tag.id) },
+            ]"
             @click="toggleTag(tag.id)"
           >
             <text>{{ tag.label }}</text>
+            <view class="tag-remove" @click.stop="removeTag(tag.id)">
+              <text class="tag-remove-icon">×</text>
+            </view>
           </view>
           <view class="tag-item tag-custom" @click="onCustomTag">
-            <text class="material-icons add-icon">add</text>
+            <image class="add-icon" src="/static/svg/add-label.svg" mode="aspectFit" />
             <text>自定义</text>
           </view>
         </view>
@@ -113,37 +156,70 @@
     </view>
 
     <view class="bottom-action">
-      <view class="save-btn" @click="onSave">
-        <text>保存档案</text>
+      <view class="save-btn" :class="{ 'save-btn--loading': saving }" @click="onSave">
+        <text>{{ saving ? '保存中...' : '保存档案' }}</text>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
+import PageNavBar from '@/components/page-nav-bar/index.vue'
+import { createPet, fetchPet, updatePet } from '@/api/pets'
+import { uploadImage } from '@/api/upload'
+import { getSvgIconSrc, getTypeIconName, GENDER_ICON_ACTIVE } from './icons'
+import { ensureLoggedIn, handleApiError } from '@/utils/auth'
+import { refreshDefaultPet } from '@/utils/default-pet'
+import {
+  buildCreatePetPayload,
+  formatBirthdayForPicker,
+  mapApiToGender,
+  mapSpeciesToPetType,
+  parseNotesToTagLabels,
+  type GenderId,
+  type PetTypeId,
+} from '@/utils/pet-mapper'
+
+type PetTag = {
+  id: string
+  label: string
+  styleClass: string
+  custom?: boolean
+}
+
+const editingPetId = ref('')
+const pageTitle = computed(() => (editingPetId.value ? '编辑宠物档案' : '添加宠物档案'))
+const saving = ref(false)
+const loading = ref(false)
 
 const petName = ref('')
-const petType = ref('dog')
+const petType = ref<PetTypeId>('dog')
 const breed = ref('')
-const gender = ref<'male' | 'female'>('male')
+const gender = ref<GenderId>('male')
 const birthday = ref('')
 const weight = ref('')
-const selectedTags = ref(['puppy'])
+const selectedTags = ref<string[]>([])
+const avatarLocalPath = ref('')
+const avatarUrl = ref('')
+const isDefault = ref(false)
 
-const petTypes = [
-  { id: 'dog', label: '狗狗', icon: 'pets' },
-  { id: 'cat', label: '猫咪', icon: 'pets' },
-  { id: 'other', label: '其他', icon: 'category' },
+const avatarPreview = computed(() => avatarLocalPath.value || avatarUrl.value || '')
+
+const petTypes: { id: PetTypeId; label: string }[] = [
+  { id: 'dog', label: '狗狗' },
+  { id: 'cat', label: '猫咪' },
+  { id: 'other', label: '其他' },
 ]
 
-const tags = [
+const tags = ref<PetTag[]>([
   { id: 'glass', label: '玻璃胃', styleClass: 'tag-secondary' },
   { id: 'allergy', label: '鸡肉过敏', styleClass: 'tag-tertiary' },
   { id: 'puppy', label: '幼犬期', styleClass: 'tag-primary' },
   { id: 'fat', label: '易胖体质', styleClass: 'tag-neutral' },
   { id: 'picky', label: '挑食', styleClass: 'tag-neutral' },
-]
+])
 
 const onBack = () => {
   uni.navigateBack({ fail: () => uni.switchTab({ url: '/pages/profile/index' }) })
@@ -152,12 +228,69 @@ const onBack = () => {
 const onUploadPhoto = () => {
   uni.chooseImage({
     count: 1,
-    success: () => uni.showToast({ title: '照片已选择', icon: 'none' }),
+    sizeType: ['compressed'],
+    sourceType: ['album', 'camera'],
+    success: (res) => {
+      avatarLocalPath.value = res.tempFilePaths[0]
+    },
   })
 }
 
+const loadPetForEdit = async (id: string) => {
+  loading.value = true
+  try {
+    const pet = await fetchPet(id)
+    petName.value = pet.name
+    petType.value = mapSpeciesToPetType(pet.species)
+    breed.value = pet.breed || ''
+    gender.value = mapApiToGender(pet.gender)
+    birthday.value = formatBirthdayForPicker(pet.birthday)
+    weight.value = pet.weight != null ? String(pet.weight) : ''
+    avatarUrl.value = pet.avatarUrl || ''
+    avatarLocalPath.value = ''
+    isDefault.value = pet.isDefault ?? false
+
+    const noteLabels = parseNotesToTagLabels(pet.notes)
+    selectedTags.value = []
+    noteLabels.forEach((label) => {
+      const existing = tags.value.find((tag) => tag.label === label)
+      if (existing) {
+        selectedTags.value.push(existing.id)
+        return
+      }
+      const tagId = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      tags.value.push({
+        id: tagId,
+        label,
+        styleClass: 'tag-neutral',
+        custom: true,
+      })
+      selectedTags.value.push(tagId)
+    })
+  } catch (error) {
+    handleApiError(error, '加载宠物档案失败')
+    setTimeout(() => onBack(), 300)
+  } finally {
+    loading.value = false
+  }
+}
+
+onLoad((query) => {
+  if (!ensureLoggedIn()) return
+  const id = typeof query?.id === 'string' ? query.id : ''
+  if (id) {
+    editingPetId.value = id
+    loadPetForEdit(id)
+  }
+})
+
 const onBirthdayChange = (e: { detail: { value: string } }) => {
   birthday.value = e.detail.value
+}
+
+const onDefaultChange = (e: { detail: { value: boolean } } | Event) => {
+  if (!('detail' in e)) return
+  isDefault.value = e.detail.value
 }
 
 const toggleTag = (id: string) => {
@@ -170,15 +303,105 @@ const toggleTag = (id: string) => {
 }
 
 const onCustomTag = () => {
-  uni.showToast({ title: '添加自定义标签', icon: 'none' })
+  uni.showModal({
+    title: '添加标签',
+    editable: true,
+    placeholderText: '请输入标签名称',
+    success: (res) => {
+      if (!res.confirm) return
+
+      const label = res.content?.trim()
+      if (!label) {
+        uni.showToast({ title: '请输入标签名称', icon: 'none' })
+        return
+      }
+      if (label.length > 10) {
+        uni.showToast({ title: '标签最多10个字', icon: 'none' })
+        return
+      }
+      if (tags.value.some((tag) => tag.label === label)) {
+        uni.showToast({ title: '标签已存在', icon: 'none' })
+        return
+      }
+
+      const id = `custom-${Date.now()}`
+      tags.value.push({
+        id,
+        label,
+        styleClass: 'tag-neutral',
+        custom: true,
+      })
+      selectedTags.value.push(id)
+    },
+  })
 }
 
-const onSave = () => {
-  if (!petName.value) {
+const removeTag = (id: string) => {
+  const tag = tags.value.find((item) => item.id === id)
+  if (!tag) return
+
+  uni.showModal({
+    title: '删除标签',
+    content: `确定删除「${tag.label}」吗？`,
+    success: (res) => {
+      if (!res.confirm) return
+
+      tags.value = tags.value.filter((item) => item.id !== id)
+      const idx = selectedTags.value.indexOf(id)
+      if (idx >= 0) {
+        selectedTags.value.splice(idx, 1)
+      }
+    },
+  })
+}
+
+const getSelectedTagLabels = () =>
+  tags.value.filter((tag) => selectedTags.value.includes(tag.id)).map((tag) => tag.label)
+
+const onSave = async () => {
+  if (saving.value) return
+  if (!ensureLoggedIn()) return
+
+  if (!petName.value.trim()) {
     uni.showToast({ title: '请输入宠物名字', icon: 'none' })
     return
   }
-  uni.showToast({ title: '档案保存成功', icon: 'success' })
+
+  saving.value = true
+  try {
+    let nextAvatarUrl = avatarUrl.value
+    if (avatarLocalPath.value) {
+      const uploadResult = await uploadImage(avatarLocalPath.value)
+      nextAvatarUrl = uploadResult.url
+    }
+
+    const payload = buildCreatePetPayload({
+      name: petName.value,
+      petType: petType.value,
+      breed: breed.value,
+      gender: gender.value,
+      birthday: birthday.value,
+      weight: weight.value,
+      avatarUrl: nextAvatarUrl || undefined,
+      tagLabels: getSelectedTagLabels(),
+      isDefault: isDefault.value,
+    })
+
+    if (editingPetId.value) {
+      await updatePet(editingPetId.value, payload)
+    } else {
+      await createPet(payload)
+    }
+
+    await refreshDefaultPet()
+
+    uni.showToast({ title: '档案保存成功', icon: 'success' })
+    setTimeout(() => onBack(), 400)
+  } catch (error) {
+    handleApiError(error, '保存失败')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 
@@ -203,6 +426,7 @@ const onSave = () => {
   --color-outline: #6e7a76;
   --color-outline-variant: #bdc9c5;
   --color-primary-fixed-dim: #76d7c4;
+  --color-placeholder: #808080;
 }
 
 .page {
@@ -210,52 +434,6 @@ const onSave = () => {
   background: var(--color-background);
   min-height: 100vh;
   padding-bottom: 200rpx;
-}
-
-@font-face {
-  font-family: 'Material Symbols Outlined';
-  font-style: normal;
-  font-weight: 100 700;
-  src: url(https://fonts.gstatic.com/s/materialsymbolsoutlined/v219/kJF1BvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oDMzByHX9rA6RzaxHMPdY43zj-jCxv3fzvRNU22ZXGJpEpjC_1n-q_4MrImHCIJIZrDCvHeem.woff2) format('woff2');
-}
-
-.material-icons {
-  font-family: 'Material Symbols Outlined';
-  font-size: 48rpx;
-  line-height: 1;
-  display: inline-block;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.icon-fill {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 32rpx 40rpx;
-  background: var(--color-background);
-}
-
-.back-btn {
-  padding: 16rpx;
-  margin-left: -16rpx;
-  color: var(--color-on-surface-variant);
-}
-
-.page-title {
-  font-size: 44rpx;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.top-spacer {
-  width: 80rpx;
 }
 
 .main-content {
@@ -283,10 +461,22 @@ const onSave = () => {
   align-items: center;
   justify-content: center;
   color: var(--color-on-surface-variant);
+  overflow: hidden;
+}
+
+.upload-circle--filled {
+  border-style: solid;
+  border-color: var(--color-primary-fixed);
+}
+
+.upload-preview {
+  width: 100%;
+  height: 100%;
 }
 
 .upload-icon {
-  font-size: 64rpx !important;
+  width: 64rpx;
+  height: 64rpx;
   margin-bottom: 8rpx;
 }
 
@@ -303,6 +493,37 @@ const onSave = () => {
   display: flex;
   flex-direction: column;
   gap: 32rpx;
+}
+
+.default-card {
+  margin-top: 32rpx;
+}
+
+.default-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.default-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.default-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin-bottom: 8rpx;
+}
+
+.default-desc {
+  display: block;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: var(--color-on-surface-variant);
 }
 
 .form-group {
@@ -327,20 +548,47 @@ const onSave = () => {
   color: var(--color-on-surface-variant);
 }
 
-.soft-input {
-  width: 100%;
+.soft-input-wrap {
+  display: flex;
+  align-items: center;
+  min-height: 88rpx;
   background: var(--color-surface-container-low);
   border: 2rpx solid transparent;
   border-radius: 19998rpx;
   padding: 24rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.soft-input-field {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 40rpx;
+  line-height: 40rpx;
   font-size: 28rpx;
   color: var(--color-on-background);
+  background: transparent;
   box-sizing: border-box;
+}
+
+.soft-input-field::placeholder {
+  color: var(--color-placeholder);
+}
+
+.picker-text--placeholder {
+  color: var(--color-placeholder);
+}
+
+.soft-input-field--icon {
+  padding-right: 48rpx;
+}
+
+.soft-input-field--suffix {
+  padding-right: 64rpx;
 }
 
 .picker-text {
   display: block;
-  line-height: 40rpx;
 }
 
 .input-with-icon,
@@ -353,8 +601,8 @@ const onSave = () => {
   right: 24rpx;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 40rpx !important;
-  color: var(--color-on-surface-variant);
+  width: 28rpx;
+  height: 28rpx;
   pointer-events: none;
 }
 
@@ -393,6 +641,13 @@ const onSave = () => {
   color: var(--color-primary);
 }
 
+.type-icon {
+  width: 48rpx;
+  height: 48rpx;
+  flex-shrink: 0;
+  display: block;
+}
+
 .gender-switch {
   display: flex;
   background: var(--color-surface-container-low);
@@ -416,12 +671,22 @@ const onSave = () => {
 
 .gender-active {
   background: var(--color-surface-container-lowest);
-  color: var(--color-primary);
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 
+.gender-active-male {
+  color: #1296db;
+}
+
+.gender-active-female {
+  color: #9d174d;
+}
+
 .gender-icon {
-  font-size: 40rpx !important;
+  width: 40rpx;
+  height: 40rpx;
+  flex-shrink: 0;
+  display: block;
 }
 
 .tags-section {
@@ -454,11 +719,31 @@ const onSave = () => {
 }
 
 .tag-item {
-  padding: 16rpx 32rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 16rpx 16rpx 32rpx;
   border-radius: 19998rpx;
   font-size: 24rpx;
   font-weight: 600;
   border: 2rpx solid;
+}
+
+.tag-remove {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tag-remove-icon {
+  font-size: 28rpx;
+  line-height: 1;
+  color: var(--color-outline);
 }
 
 .tag-secondary {
@@ -499,7 +784,9 @@ const onSave = () => {
 }
 
 .add-icon {
-  font-size: 32rpx !important;
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
 }
 
 .bottom-action {
@@ -525,5 +812,9 @@ const onSave = () => {
   font-weight: 700;
   text-align: center;
   box-shadow: 0 4rpx 16rpx rgba(0, 107, 93, 0.15);
+}
+
+.save-btn--loading {
+  opacity: 0.7;
 }
 </style>

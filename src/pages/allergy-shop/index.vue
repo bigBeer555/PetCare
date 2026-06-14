@@ -1,21 +1,24 @@
 <template>
   <view class="page">
-    <view class="top-bar">
-      <image
-        class="avatar"
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBcP_5YSG7HkyLF24bBG1IrlfwEpYpQskYjNMav159xza6Fv5uXt36al86eGh08YjGnrzyZZDnqb3gK179gV9YHN2eBi-pFXXFhpIwQh_ehjQ4FJVduGziVDPBq-USzJ0mG9lhuVV5vz7Duc_Uv59I8S9LDannS-kTMAgwyM4Bwl8HVvhR95SjHyr8EAWhe-2xcnVvFXh9cD6_wuN7MedmZI8I8cRFoRL9h9mJllSTN12dYzdDqlqV8GL1v9pV5qN--WA10O_xWpg"
-      />
-      <text class="page-title">避敏商城</text>
-      <view class="notification-btn" @click="onNotification">
-        <text class="material-icons">notifications</text>
-      </view>
-    </view>
+    <PageNavBar
+      variant="brand"
+      title="避敏商城"
+      mobile-only
+      sticky
+      title-size="24"
+      :avatar="mobileAvatar"
+      @notification-click="onNotification"
+    />
 
     <view class="main-content">
       <view class="recommend-banner">
         <view class="banner-blob" />
         <view class="banner-icon">
-          <text class="material-icons icon-fill">sound_detection_dog_barking</text>
+          <image
+            class="banner-icon-img"
+            src="/static/svg/word-remind.svg"
+            mode="aspectFit"
+          />
         </view>
         <view class="banner-text">
           <text>针对 </text>
@@ -38,59 +41,7 @@
         </view>
       </scroll-view>
 
-      <view class="product-grid">
-        <view
-          v-for="product in products"
-          :key="product.id"
-          class="product-card"
-          @click="onProductClick(product.id)"
-        >
-          <view class="product-cover" :class="product.coverClass">
-            <image
-              v-if="product.image"
-              class="product-img"
-              :src="product.image"
-              mode="aspectFit"
-            />
-            <view v-else class="placeholder-cover">
-              <text class="material-icons placeholder-icon">medication_liquid</text>
-              <text class="placeholder-text">更多洗护好物</text>
-            </view>
-            <view v-if="product.suitable" class="suitable-tag">
-              <text class="material-icons suitable-icon">check_circle</text>
-              <text>适合跳跳</text>
-            </view>
-          </view>
-          <view class="product-body">
-            <template v-if="product.name">
-              <text class="product-name">{{ product.name }}</text>
-              <view class="rating-row">
-                <view class="stars">
-                  <text
-                    v-for="(star, idx) in product.stars"
-                    :key="idx"
-                    class="material-icons star-icon"
-                    :class="product.starColorClass"
-                    :style="star.filled ? 'font-variation-settings: \'FILL\' 1' : ''"
-                  >{{ star.icon }}</text>
-                </view>
-                <text class="match-score" :class="product.starColorClass">{{ product.matchScore }}</text>
-              </view>
-              <view class="price-row">
-                <view class="price">
-                  <text class="price-symbol">¥</text>
-                  <text class="price-value">{{ product.price }}</text>
-                </view>
-                <text class="sales">{{ product.sales }}</text>
-              </view>
-            </template>
-            <template v-else>
-              <view class="skeleton-line skeleton-long" />
-              <view class="skeleton-line skeleton-short" />
-            </template>
-          </view>
-        </view>
-      </view>
+      <ProductWaterfall :products="products" @product-click="onProductClick" />
     </view>
 
   </view>
@@ -98,29 +49,17 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import PageNavBar from '@/components/page-nav-bar/index.vue'
+import ProductWaterfall from '@/components/product-waterfall/index.vue'
+import type { ProductItem } from '@/components/product-card/types'
+
+const mobileAvatar =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCLf1dEm0P0iLgUzCm6Qnmti5qHATwnCMx-Zd-uLiC0JGT99aIOxe9Ej2N86u0qdFnyd66NuC0B515jh_wow_pw76Ycc2iM-br7G9S3qujTnf9_zPE5BZEMdMLPmRlCNTq5EwIzQxiAEnGi_6ixKFej1cHasJDioNo3WeQ7BKF2IhIh5gwZWegCETgRQMX9LHiBr65T4tUwnbWTMD1dxw2Ki-yaRs3hXgNrMZ_xvjGXf2cD0wIm5ehfIiowmrRbcU-k_H64-ssdFrI'
 
 interface Category {
   id: string
   label: string
   styleClass: string
-}
-
-interface StarItem {
-  icon: string
-  filled: boolean
-}
-
-interface Product {
-  id: number
-  name?: string
-  image?: string
-  price?: number
-  sales?: string
-  matchScore?: string
-  starColorClass?: string
-  stars?: StarItem[]
-  suitable?: boolean
-  coverClass?: string
 }
 
 const activeCategory = ref('all')
@@ -132,7 +71,7 @@ const categories: Category[] = [
   { id: 'snack', label: '零食', styleClass: 'tag-neutral' },
 ]
 
-const products: Product[] = [
+const products: ProductItem[] = [
   {
     id: 1,
     name: '天然鸭肉烘焙粮（去泪痕配方）',
@@ -142,13 +81,12 @@ const products: Product[] = [
     matchScore: '98% 适配',
     starColorClass: 'color-tertiary',
     suitable: true,
-    coverClass: 'cover-square',
     stars: [
-      { icon: 'star', filled: true },
-      { icon: 'star', filled: true },
-      { icon: 'star', filled: true },
-      { icon: 'star', filled: true },
-      { icon: 'star_half', filled: true },
+      { filled: true },
+      { filled: true },
+      { filled: true },
+      { filled: true },
+      { filled: true, half: true },
     ],
   },
   {
@@ -159,18 +97,16 @@ const products: Product[] = [
     sales: '月销 800+',
     matchScore: '85% 适配',
     starColorClass: 'color-secondary',
-    coverClass: 'cover-tall',
     stars: [
-      { icon: 'star', filled: true },
-      { icon: 'star', filled: true },
-      { icon: 'star', filled: true },
-      { icon: 'star', filled: true },
-      { icon: 'star', filled: false },
+      { filled: true },
+      { filled: true },
+      { filled: true },
+      { filled: true },
+      { filled: false },
     ],
   },
   {
     id: 3,
-    coverClass: 'cover-tall',
   },
 ]
 
@@ -215,62 +151,8 @@ const onProductClick = (id: number) => {
   min-height: 100vh;
 }
 
-@font-face {
-  font-family: 'Material Symbols Outlined';
-  font-style: normal;
-  font-weight: 100 700;
-  src: url(https://fonts.gstatic.com/s/materialsymbolsoutlined/v219/kJF1BvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oDMzByHX9rA6RzaxHMPdY43zj-jCxv3fzvRNU22ZXGJpEpjC_1n-q_4MrImHCIJIZrDCvHeem.woff2) format('woff2');
-}
-
-.material-icons {
-  font-family: 'Material Symbols Outlined';
-  font-size: 48rpx;
-  line-height: 1;
-  display: inline-block;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.icon-fill {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 128rpx;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40rpx;
-  background: var(--color-background);
-  border-bottom: 2rpx solid rgba(229, 226, 219, 0.1);
-  box-sizing: border-box;
-}
-
-.avatar {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 50%;
-  border: 2rpx solid var(--color-surface-variant);
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: 48rpx;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.notification-btn {
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-
 .main-content {
-  padding: 160rpx 40rpx 0;
+  padding: 32rpx 40rpx 0;
 }
 
 .recommend-banner {
@@ -302,13 +184,12 @@ const onProductClick = (id: number) => {
 .banner-icon {
   width: 80rpx;
   height: 80rpx;
-  border-radius: 50%;
-  background: var(--color-primary-container);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-on-primary-container);
   flex-shrink: 0;
+}
+
+.banner-icon-img {
+  width: 80rpx;
+  height: 80rpx;
 }
 
 .banner-text {
@@ -370,168 +251,5 @@ const onProductClick = (id: number) => {
   background: var(--color-surface-container-high);
   color: var(--color-on-surface-variant);
   border: 2rpx solid var(--color-surface-variant);
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24rpx;
-}
-
-.product-card {
-  background: var(--color-surface-container-lowest);
-  border: 4rpx solid var(--color-surface-variant);
-  border-radius: 24rpx;
-  overflow: hidden;
-}
-
-.product-cover {
-  position: relative;
-  background: var(--color-surface-container);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32rpx;
-}
-
-.cover-square {
-  aspect-ratio: 1;
-}
-
-.cover-tall {
-  aspect-ratio: 4 / 5;
-}
-
-.product-img {
-  width: 100%;
-  height: 100%;
-}
-
-.placeholder-cover {
-  width: 100%;
-  height: 100%;
-  border: 4rpx dashed var(--color-outline-variant);
-  border-radius: 16rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-outline);
-}
-
-.placeholder-icon {
-  font-size: 64rpx !important;
-}
-
-.placeholder-text {
-  font-size: 24rpx;
-  font-weight: 600;
-  margin-top: 16rpx;
-}
-
-.suitable-tag {
-  position: absolute;
-  top: 16rpx;
-  left: 16rpx;
-  background: var(--color-primary-container);
-  color: var(--color-on-primary-container);
-  font-size: 20rpx;
-  font-weight: 600;
-  padding: 8rpx 16rpx;
-  border-radius: 19998rpx;
-  display: flex;
-  align-items: center;
-  gap: 4rpx;
-  border: 2rpx solid rgba(0, 107, 93, 0.2);
-}
-
-.suitable-icon {
-  font-size: 24rpx !important;
-}
-
-.product-body {
-  padding: 24rpx;
-}
-
-.product-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  line-height: 40rpx;
-  color: var(--color-on-surface);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.rating-row {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  margin-top: 8rpx;
-}
-
-.stars {
-  display: flex;
-}
-
-.star-icon {
-  font-size: 28rpx !important;
-}
-
-.color-tertiary {
-  color: var(--color-tertiary);
-}
-
-.color-secondary {
-  color: var(--color-secondary);
-}
-
-.match-score {
-  font-size: 20rpx;
-  font-weight: 600;
-}
-
-.price-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-top: 16rpx;
-}
-
-.price {
-  display: flex;
-  align-items: baseline;
-  color: var(--color-error);
-}
-
-.price-symbol {
-  font-size: 24rpx;
-  font-weight: 600;
-}
-
-.price-value {
-  font-size: 44rpx;
-  font-weight: 700;
-}
-
-.sales {
-  font-size: 20rpx;
-  color: var(--color-outline);
-}
-
-.skeleton-line {
-  height: 32rpx;
-  background: var(--color-surface-variant);
-  border-radius: 8rpx;
-  margin-bottom: 16rpx;
-}
-
-.skeleton-long {
-  width: 75%;
-}
-
-.skeleton-short {
-  width: 50%;
 }
 </style>
