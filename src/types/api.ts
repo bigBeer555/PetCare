@@ -60,3 +60,54 @@ export interface UploadImageData {
 export interface DeletePetData {
   deleted: true
 }
+
+export interface AiMessage {
+  id: number | null
+  role: 'user' | 'assistant' | string
+  content: string
+  createdAt: string
+  isWelcome: boolean
+  imageUrls?: string[]
+  localImagePaths?: string[]
+}
+
+export interface AiConversationListItem {
+  id: number
+  title: string
+  petId: number | null
+  preview: string
+  messageCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AiConversationDetail {
+  id: number
+  title: string
+  petId: number | null
+  messageCount: number
+  messages: AiMessage[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateAiConversationRequest {
+  petId?: number
+}
+
+export interface SendAiMessageRequest {
+  message?: string
+  imageUrls?: string[]
+}
+
+export interface SendAiMessageData {
+  conversationId: number
+  title: string
+  model: string
+  userMessage: AiMessage
+  assistantMessage: AiMessage
+}
+
+export interface DeleteAiConversationData {
+  deleted: true
+}

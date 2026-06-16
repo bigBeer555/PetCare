@@ -10,10 +10,10 @@
       <template #right>
         <view class="nav-actions">
           <view class="nav-action-btn" @click.stop="onNotification">
-            <image class="nav-action-icon" src="/static/svg/message.svg" mode="aspectFit" />
+            <view class="nav-action-icon nav-action-icon--message" />
           </view>
           <view class="nav-action-btn" @click.stop="onSettings">
-            <image class="nav-action-icon" src="/static/svg/settings.svg" mode="aspectFit" />
+            <view class="nav-action-icon nav-action-icon--settings" />
           </view>
         </view>
       </template>
@@ -242,18 +242,41 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 24rpx;
+  gap: 8rpx;
 }
 
 .nav-action-btn {
+  width: 76rpx;
+  height: 76rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .nav-action-icon {
-  width: 56rpx;
-  height: 56rpx;
+  width: var(--page-nav-bar-icon-size, 62rpx);
+  height: var(--page-nav-bar-icon-size, 62rpx);
+  background-color: var(--color-primary, #006b5d);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: var(--page-nav-bar-icon-mask-size, 132%);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: var(--page-nav-bar-icon-mask-size, 132%);
+  -webkit-filter: var(--page-nav-bar-icon-bold-filter);
+  filter: var(--page-nav-bar-icon-bold-filter);
+  flex-shrink: 0;
+}
+
+.nav-action-icon--message {
+  -webkit-mask-image: url('/static/svg/message.svg');
+  mask-image: url('/static/svg/message.svg');
+}
+
+.nav-action-icon--settings {
+  -webkit-mask-image: url('/static/svg/settings.svg');
+  mask-image: url('/static/svg/settings.svg');
 }
 
 .profile-section {

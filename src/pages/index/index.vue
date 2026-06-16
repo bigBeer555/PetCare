@@ -48,8 +48,9 @@
 
     <!-- Main Content -->
     <view class="main-content">
-      <!-- Profile Header -->
-      <view v-if="homePet" class="profile-section">
+      <!-- 已登录：默认宠物 -->
+      <template v-if="loggedIn && homePet">
+      <view class="profile-section">
         <view class="profile-avatar-wrapper">
           <view class="profile-avatar">
             <image class="avatar-img" :src="homePet.avatar" mode="aspectFill" />
@@ -91,18 +92,6 @@
         </view>
       </view>
 
-      <view v-else class="profile-section profile-section--empty" @click="onAddPet">
-        <view class="profile-avatar-wrapper">
-          <view class="profile-avatar profile-avatar--empty">
-            <image class="avatar-img" src="/static/svg/animal-paw.svg" mode="aspectFit" />
-          </view>
-        </view>
-        <view class="profile-info">
-          <text class="profile-name">暂无默认宠物</text>
-          <text class="profile-desc">添加宠物并设为默认后，将在此展示</text>
-        </view>
-      </view>
-
       <!-- Action Icons -->
       <view class="actions-row">
         <view class="action-item" @click="onAction('food')">
@@ -135,13 +124,12 @@
       <view class="tasks-section">
         <view class="tasks-header">
           <text class="tasks-title">今日任务</text>
-          <view class="tasks-all" @click="onAllTasks">
-            <text>全部</text>
+          <view class="tasks-all" @click="onManageTasks">
+            <text>管理</text>
             <image class="chevron-icon" src="/static/svg/task-more.svg" mode="aspectFit" />
           </view>
         </view>
         <view class="tasks-list">
-          <!-- Task 1: Completed -->
           <view class="task-card">
             <view class="task-icon-wrapper task-icon-done">
               <image class="task-icon" src="/static/svg/feeding.svg" mode="aspectFit" />
@@ -154,7 +142,6 @@
               <image class="check-icon" src="/static/svg/check-success.svg" mode="aspectFit" />
             </view>
           </view>
-          <!-- Task 2: Action Needed -->
           <view class="task-card">
             <view class="task-icon-wrapper task-icon-warn">
               <image class="task-icon" src="/static/svg/remind.svg" mode="aspectFit" />
@@ -169,29 +156,236 @@
           </view>
         </view>
       </view>
+      </template>
+
+      <!-- 已登录：无默认宠物 -->
+      <template v-else-if="loggedIn">
+      <view class="profile-section profile-section--empty" @click="onAddPet">
+        <view class="profile-avatar-wrapper">
+          <view class="profile-avatar profile-avatar--empty">
+            <image class="avatar-img" src="/static/svg/animal-paw.svg" mode="aspectFit" />
+          </view>
+        </view>
+        <view class="profile-info">
+          <text class="profile-name">暂无默认宠物</text>
+          <text class="profile-desc">添加宠物并设为默认后，将在此展示</text>
+        </view>
+      </view>
+
+      <view class="actions-row">
+        <view class="action-item" @click="onAction('food')">
+          <view class="action-icon action-icon-primary">
+            <image class="action-icon-inner" src="/static/svg/food.svg" mode="aspectFit" />
+          </view>
+          <text class="action-label">能不能吃</text>
+        </view>
+        <view class="action-item" @click="onAction('feed')">
+          <view class="action-icon action-icon-teal">
+            <image class="action-icon-inner" src="/static/svg/smart.svg" mode="aspectFit" />
+          </view>
+          <text class="action-label">智能喂养</text>
+        </view>
+        <view class="action-item" @click="onAction('health')">
+          <view class="action-icon action-icon-error">
+            <image class="action-icon-inner" src="/static/svg/exceptional.svg" mode="aspectFit" />
+          </view>
+          <text class="action-label">异常自查</text>
+        </view>
+        <view class="action-item" @click="onAction('train')">
+          <view class="action-icon action-icon-secondary">
+            <image class="action-icon-inner" src="/static/svg/class.svg" mode="aspectFit" />
+          </view>
+          <text class="action-label">训宠课</text>
+        </view>
+      </view>
+
+      <view class="tasks-section">
+        <view class="tasks-header">
+          <text class="tasks-title">今日任务</text>
+          <view class="tasks-all" @click="onManageTasks">
+            <text>管理</text>
+            <image class="chevron-icon" src="/static/svg/task-more.svg" mode="aspectFit" />
+          </view>
+        </view>
+        <view class="tasks-list">
+          <view class="task-card">
+            <view class="task-icon-wrapper task-icon-done">
+              <image class="task-icon" src="/static/svg/feeding.svg" mode="aspectFit" />
+            </view>
+            <view class="task-info">
+              <text class="task-name">晚餐喂食</text>
+              <text class="task-detail">18:00 · 120g 幼犬粮</text>
+            </view>
+            <view class="task-check">
+              <image class="check-icon" src="/static/svg/check-success.svg" mode="aspectFit" />
+            </view>
+          </view>
+          <view class="task-card">
+            <view class="task-icon-wrapper task-icon-warn">
+              <image class="task-icon" src="/static/svg/remind.svg" mode="aspectFit" />
+            </view>
+            <view class="task-info">
+              <text class="task-name">内驱虫提醒</text>
+              <text class="task-detail task-detail-warn">今天到期 · 请尽快完成</text>
+            </view>
+            <view class="task-btn" @click="onRecord">
+              <text>记录</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      </template>
+
+      <!-- 未登录 -->
+      <template v-else>
+        <view class="profile-section guest-welcome">
+          <view class="profile-avatar-wrapper">
+            <view class="profile-avatar">
+              <image class="avatar-img guest-logo-img" :src="guestLogoUrl" mode="aspectFit" />
+            </view>
+          </view>
+          <view class="profile-info guest-welcome-text">
+            <text class="guest-title">欢迎来到宠爱宝</text>
+            <text class="profile-desc">开启科学养宠第一步</text>
+          </view>
+          <view class="guest-login-btn" @click="onLogin">
+            <text>立即登录 / 注册</text>
+          </view>
+          <text class="guest-join-tip">加入 10,000+ 宠主的科学养宠社区</text>
+        </view>
+
+        <view class="guest-section">
+          <view class="guest-section-header">
+            <text class="guest-section-title">探索功能</text>
+            <text class="guest-section-hint">登录后解锁全部</text>
+          </view>
+          <view class="guest-feature-grid">
+            <view
+              v-for="item in guestFeatures"
+              :key="item.title"
+              class="guest-feature-card"
+              :class="{ 'guest-feature-card--dimmed': item.dimmed }"
+              @click="onLogin"
+            >
+              <view class="guest-feature-icon" :class="item.iconClass">
+                <image class="guest-feature-icon-img" :src="item.icon" mode="aspectFit" />
+              </view>
+              <text class="guest-feature-name">{{ item.title }}</text>
+              <text class="guest-feature-desc">{{ item.desc }}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="guest-section">
+          <text class="guest-section-title guest-section-title--block">为什么选择宠爱宝？</text>
+          <view class="guest-reason-list">
+            <view
+              v-for="item in guestReasons"
+              :key="item.title"
+              class="guest-reason-card"
+              :class="item.borderClass"
+            >
+              <view class="guest-reason-icon-wrap">
+                <image class="guest-reason-icon" :src="item.icon" mode="aspectFit" />
+              </view>
+              <view class="guest-reason-copy">
+                <text class="guest-reason-title">{{ item.title }}</text>
+                <text class="guest-reason-desc">{{ item.desc }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="guest-quote-card">
+          <image class="guest-quote-watermark" src="/static/svg/animal-paw.svg" mode="aspectFit" />
+          <text class="guest-quote-text">“每一只毛孩子都值得被更科学地呵护。”</text>
+        </view>
+      </template>
     </view>
 
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import PageNavBar from '@/components/page-nav-bar/index.vue'
 import { refreshDefaultPet, defaultPetRef } from '@/utils/default-pet'
 import { mapPetToHomeDisplay } from '@/utils/pet-mapper'
-import { ensureLoggedIn, handleApiError } from '@/utils/auth'
+import { handleApiError } from '@/utils/auth'
 import { isLoggedIn } from '@/utils/storage'
+
+const guestLogoUrl =
+  'https://lh3.googleusercontent.com/aida/AP1WRLvWtr5G_6BRpEDgsItY_LziqNzZ8hLemnOyoaVkFEEl3IXom37-3zpzIEzcNcpSer4b0HpWGy8yHi5PI_5TIaccelODpSAj734DwqP1A5VZxKyejng1DKLY2ecpPqWDaE57WleW8dPyDwmb0FrNWa-9CIFCJ2eW0Tdzcf6uqZBoH89qB9IEpGzNtvJzRW0NxIp4uVbYoSf-Q4bqRc8eETKYz6jhfQ95mho7mMD9n_INtJyosJaiOShKBgs'
+
+const loggedIn = ref(false)
+
+const guestFeatures = [
+  {
+    icon: '/static/svg/food.svg',
+    title: '能吃吗',
+    desc: '食材禁忌查询',
+    iconClass: 'guest-feature-icon--secondary',
+    dimmed: false,
+  },
+  {
+    icon: '/static/svg/smart.svg',
+    title: '智能喂养',
+    desc: '个性化食谱',
+    iconClass: 'guest-feature-icon--primary',
+    dimmed: false,
+  },
+  {
+    icon: '/static/svg/exceptional.svg',
+    title: '症状自查',
+    desc: '医疗急救指南',
+    iconClass: 'guest-feature-icon--error',
+    dimmed: false,
+  },
+  {
+    icon: '/static/svg/class.svg',
+    title: '学宠社群',
+    desc: '行为纠正课程',
+    iconClass: 'guest-feature-icon--teal',
+    dimmed: false,
+  },
+]
+
+const guestReasons = [
+  {
+    icon: '/static/svg/check-success.svg',
+    title: '全方位健康追踪',
+    desc: '从疫苗提醒到体重趋势，不漏掉每一个健康细节。',
+    borderClass: 'guest-reason-card--primary',
+  },
+  {
+    icon: '/static/svg/smart.svg',
+    title: 'AI 智能配餐',
+    desc: '根据品种、年龄、健康状况，自动生成每日营养方案。',
+    borderClass: 'guest-reason-card--secondary',
+  },
+  {
+    icon: '/static/svg/class.svg',
+    title: '资深专家课程',
+    desc: '国内外知名兽医、训犬师入驻，解决您的养宠难题。',
+    borderClass: 'guest-reason-card--teal',
+  },
+]
 
 const homePet = computed(() =>
   defaultPetRef.value ? mapPetToHomeDisplay(defaultPetRef.value) : null,
 )
 
-const navTitle = computed(() => homePet.value?.name || '宠爱宝')
-const navAvatar = computed(() => homePet.value?.avatar || '')
+const navTitle = computed(() => {
+  if (!loggedIn.value) return '宠爱宝'
+  return homePet.value?.name || '宠爱宝'
+})
+const navAvatar = computed(() => (loggedIn.value && homePet.value ? homePet.value.avatar : ''))
 
 const loadHomePet = async () => {
-  if (!isLoggedIn()) {
+  loggedIn.value = isLoggedIn()
+
+  if (!loggedIn.value) {
     defaultPetRef.value = null
     return
   }
@@ -212,8 +406,11 @@ onShow(() => {
 })
 
 const onAddPet = () => {
-  if (!ensureLoggedIn()) return
   uni.navigateTo({ url: '/extra/add-pet/index' })
+}
+
+const onLogin = () => {
+  uni.navigateTo({ url: '/extra/login/index' })
 }
 
 const onNav = (target: string) => {
@@ -224,8 +421,8 @@ const onAction = (target: string) => {
   uni.showToast({ title: `打开: ${target}`, icon: 'none' })
 }
 
-const onAllTasks = () => {
-  uni.showToast({ title: '查看全部任务', icon: 'none' })
+const onManageTasks = () => {
+  uni.navigateTo({ url: '/extra/task-manage/index' })
 }
 
 const onRecord = () => {
@@ -746,6 +943,249 @@ const onNotification = () => {
   letter-spacing: 0.02em;
   padding: 8px 24px;
   border-radius: 9999px;
+}
+
+/* ========== Guest (未登录) ========== */
+.guest-welcome {
+  margin-bottom: 0;
+}
+
+.guest-welcome-text {
+  margin-bottom: 16px;
+}
+
+.guest-title {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: -0.02em;
+  color: var(--color-on-background);
+  margin-bottom: 4px;
+}
+
+.guest-logo-img {
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.guest-login-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 16px;
+  border-radius: 9999px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(94, 140, 131, 0.2);
+}
+
+.guest-join-tip {
+  margin-top: 16px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  color: var(--color-grey-text);
+}
+
+.guest-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.guest-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guest-section-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 30px;
+  color: var(--color-on-background);
+}
+
+.guest-section-title--block {
+  display: block;
+}
+
+.guest-section-hint {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+}
+
+.guest-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.guest-feature-card {
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 1px solid rgba(203, 214, 211, 0.3);
+}
+
+.guest-feature-card--dimmed {
+  opacity: 0.6;
+}
+
+.guest-feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.guest-feature-icon--primary {
+  background: rgba(94, 140, 131, 0.1);
+}
+
+.guest-feature-icon--teal {
+  background: var(--color-primary-container);
+}
+
+.guest-feature-icon--error {
+  background: var(--color-error-container);
+}
+
+.guest-feature-icon--secondary {
+  background: var(--color-secondary-container);
+}
+
+.guest-feature-icon-img {
+  width: 24px;
+  height: 24px;
+}
+
+.guest-feature-name {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  color: var(--color-on-background);
+}
+
+.guest-feature-desc {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--color-grey-text);
+}
+
+.guest-reason-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guest-reason-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  border: 1px solid rgba(203, 214, 211, 0.3);
+  border-left-width: 4px;
+}
+
+.guest-reason-card--primary {
+  border-left-color: var(--color-primary);
+}
+
+.guest-reason-card--secondary {
+  border-left-color: var(--color-secondary);
+}
+
+.guest-reason-card--teal {
+  border-left-color: var(--color-active-green);
+}
+
+.guest-reason-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid rgba(203, 214, 211, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.guest-reason-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.guest-reason-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.guest-reason-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  color: var(--color-on-background);
+}
+
+.guest-reason-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 400;
+  color: var(--color-on-surface-variant);
+}
+
+.guest-quote-card {
+  position: relative;
+  overflow: hidden;
+  padding: 40px 24px;
+  border-radius: 16px;
+  text-align: center;
+  background: rgba(247, 244, 236, 0.6);
+  border: 1px solid rgba(203, 214, 211, 0.3);
+}
+
+.guest-quote-watermark {
+  position: absolute;
+  right: -24px;
+  bottom: -24px;
+  width: 140px;
+  height: 140px;
+  opacity: 0.08;
+  transform: rotate(12deg);
+}
+
+.guest-quote-text {
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 28px;
+  color: var(--color-primary);
 }
 
 /* ========== Responsive ========== */

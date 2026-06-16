@@ -53,11 +53,7 @@
       </view>
       <view class="page-nav-bar__brand-right" @click="handleNotification">
         <slot name="right">
-          <image
-            class="page-nav-bar__notification"
-            :src="notificationIcon"
-            mode="aspectFit"
-          />
+          <view class="page-nav-bar__notification" />
         </slot>
       </view>
     </view>
@@ -243,6 +239,12 @@ const handleNotification = () => {
 
 <style scoped>
 .page-nav-bar-host {
+  --page-nav-bar-icon-size: 62rpx;
+  --page-nav-bar-icon-mask-size: 132%;
+  --page-nav-bar-icon-bold-filter: drop-shadow(1rpx 0 0 #006b5d)
+    drop-shadow(-1rpx 0 0 #006b5d) drop-shadow(0 1rpx 0 #006b5d)
+    drop-shadow(0 -1rpx 0 #006b5d) drop-shadow(0.8rpx 0.8rpx 0 #006b5d)
+    drop-shadow(-0.8rpx -0.8rpx 0 #006b5d);
   width: 100%;
 }
 
@@ -404,10 +406,38 @@ const handleNotification = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 76rpx;
+  min-height: 76rpx;
+}
+
+.page-nav-bar__brand-right :deep(.nav-actions) {
+  display: flex;
+  align-items: center;
+}
+
+.page-nav-bar__brand-right :deep(.nav-action-btn) {
+  width: 76rpx;
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .page-nav-bar__notification {
-  width: 56rpx;
-  height: 56rpx;
+  width: var(--page-nav-bar-icon-size);
+  height: var(--page-nav-bar-icon-size);
+  background-color: var(--color-primary, #006b5d);
+  -webkit-mask-image: url('/static/svg/message.svg');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: var(--page-nav-bar-icon-mask-size);
+  mask-image: url('/static/svg/message.svg');
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: var(--page-nav-bar-icon-mask-size);
+  -webkit-filter: var(--page-nav-bar-icon-bold-filter);
+  filter: var(--page-nav-bar-icon-bold-filter);
+  flex-shrink: 0;
 }
 </style>

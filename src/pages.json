@@ -109,6 +109,13 @@
 						"navigationStyle": "custom",
 						"navigationBarTitleText": "立即注册"
 					}
+				},
+				{
+					"path": "task-manage/index",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "任务管理"
+					}
 				}
 			]
 		}
@@ -131,12 +138,12 @@
 				"iconPath": "static/tabbar/aiSearch.png",
 				"selectedIconPath": "static/tabbar/aiSearch_s.png"
 			},
-			{
-				"pagePath": "pages/allergy-shop/index",
-				"text": "避敏商城",
-				"iconPath": "static/tabbar/shop.png",
-				"selectedIconPath": "static/tabbar/shop_s.png"
-			},
+			// {
+			// 	"pagePath": "pages/allergy-shop/index",
+			// 	"text": "避敏商城",
+			// 	"iconPath": "static/tabbar/shop.png",
+			// 	"selectedIconPath": "static/tabbar/shop_s.png"
+			// },
 			{
 				"pagePath": "pages/pet-community/index",
 				"text": "社区",
