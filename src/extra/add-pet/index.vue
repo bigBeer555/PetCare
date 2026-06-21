@@ -136,10 +136,8 @@
             v-for="tag in tags"
             :key="tag.id"
             class="tag-item"
-            :class="[
-              tag.styleClass,
-              { 'tag-selected': selectedTags.includes(tag.id) },
-            ]"
+            :class="{ 'tag-selected': selectedTags.includes(tag.id) }"
+            :style="tagStyleMap[tag.id]"
             @click="toggleTag(tag.id)"
           >
             <text>{{ tag.label }}</text>
@@ -167,7 +165,7 @@
 import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import PageNavBar from '@/components/page-nav-bar/index.vue'
-import { createPet, fetchPet, updatePet } from '@/api/pets'
+import { createPet, createPetTag, deletePetTag, fetchPet, updatePet } from '@/api/pets'
 import { uploadImage } from '@/api/upload'
 import { getSvgIconSrc, getTypeIconName, GENDER_ICON_ACTIVE } from './icons'
 import { ensureLoggedIn, handleApiError } from '@/utils/auth'
@@ -177,16 +175,19 @@ import {
   formatBirthdayForPicker,
   mapApiToGender,
   mapSpeciesToPetType,
-  parseNotesToTagLabels,
   type GenderId,
   type PetTypeId,
 } from '@/utils/pet-mapper'
+import {
+  buildTagStyleMap,
+  canAddMoreTags,
+  MAX_PET_TAG_COUNT,
+} from '@/utils/pet-tag-styles'
 
-type PetTag = {
+type LocalPetTag = {
   id: string
   label: string
-  styleClass: string
-  custom?: boolean
+  createdAt?: string
 }
 
 const editingPetId = ref('')
@@ -213,13 +214,17 @@ const petTypes: { id: PetTypeId; label: string }[] = [
   { id: 'other', label: '其他' },
 ]
 
-const tags = ref<PetTag[]>([
-  { id: 'glass', label: '玻璃胃', styleClass: 'tag-secondary' },
-  { id: 'allergy', label: '鸡肉过敏', styleClass: 'tag-tertiary' },
-  { id: 'puppy', label: '幼犬期', styleClass: 'tag-primary' },
-  { id: 'fat', label: '易胖体质', styleClass: 'tag-neutral' },
-  { id: 'picky', label: '挑食', styleClass: 'tag-neutral' },
-])
+const tags = ref<LocalPetTag[]>([])
+const initialServerTagIds = ref<string[]>([])
+
+const tagStyleMap = computed(() => buildTagStyleMap(tags.value))
+
+const isLocalTagId = (id: string) => id.startsWith('local-')
+
+const createLocalTag = (label: string, id?: string): LocalPetTag => ({
+  id: id ?? `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  label,
+})
 
 const onBack = () => {
   uni.navigateBack({ fail: () => uni.switchTab({ url: '/pages/profile/index' }) })
@@ -250,23 +255,13 @@ const loadPetForEdit = async (id: string) => {
     avatarLocalPath.value = ''
     isDefault.value = pet.isDefault ?? false
 
-    const noteLabels = parseNotesToTagLabels(pet.notes)
-    selectedTags.value = []
-    noteLabels.forEach((label) => {
-      const existing = tags.value.find((tag) => tag.label === label)
-      if (existing) {
-        selectedTags.value.push(existing.id)
-        return
-      }
-      const tagId = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
-      tags.value.push({
-        id: tagId,
-        label,
-        styleClass: 'tag-neutral',
-        custom: true,
-      })
-      selectedTags.value.push(tagId)
-    })
+    tags.value = (pet.tags || []).map((tag) => ({
+      id: String(tag.id),
+      label: tag.label,
+      createdAt: tag.createdAt,
+    }))
+    initialServerTagIds.value = tags.value.map((tag) => tag.id)
+    selectedTags.value = tags.value.map((tag) => tag.id)
   } catch (error) {
     handleApiError(error, '加载宠物档案失败')
     setTimeout(() => onBack(), 300)
@@ -323,15 +318,14 @@ const onCustomTag = () => {
         uni.showToast({ title: '标签已存在', icon: 'none' })
         return
       }
+      if (!canAddMoreTags(tags.value.length)) {
+        uni.showToast({ title: `最多添加 ${MAX_PET_TAG_COUNT} 个标签`, icon: 'none' })
+        return
+      }
 
-      const id = `custom-${Date.now()}`
-      tags.value.push({
-        id,
-        label,
-        styleClass: 'tag-neutral',
-        custom: true,
-      })
-      selectedTags.value.push(id)
+      const localTag = createLocalTag(label)
+      tags.value.push(localTag)
+      selectedTags.value.push(localTag.id)
     },
   })
 }
@@ -355,8 +349,22 @@ const removeTag = (id: string) => {
   })
 }
 
-const getSelectedTagLabels = () =>
-  tags.value.filter((tag) => selectedTags.value.includes(tag.id)).map((tag) => tag.label)
+const syncTagsOnSave = async (petId: string) => {
+  for (const tagId of initialServerTagIds.value) {
+    const stillInUi = tags.value.some((tag) => tag.id === tagId)
+    const isSelected = selectedTags.value.includes(tagId)
+    if (!stillInUi || !isSelected) {
+      await deletePetTag(petId, tagId)
+    }
+  }
+
+  const selectedLocalTags = tags.value.filter(
+    (tag) => isLocalTagId(tag.id) && selectedTags.value.includes(tag.id),
+  )
+  for (const tag of selectedLocalTags) {
+    await createPetTag(petId, { label: tag.label })
+  }
+}
 
 const onSave = async () => {
   if (saving.value) return
@@ -383,14 +391,15 @@ const onSave = async () => {
       birthday: birthday.value,
       weight: weight.value,
       avatarUrl: nextAvatarUrl || undefined,
-      tagLabels: getSelectedTagLabels(),
       isDefault: isDefault.value,
     })
 
     if (editingPetId.value) {
       await updatePet(editingPetId.value, payload)
+      await syncTagsOnSave(editingPetId.value)
     } else {
-      await createPet(payload)
+      const created = await createPet(payload)
+      await syncTagsOnSave(String(created.id))
     }
 
     await refreshDefaultPet()
@@ -744,30 +753,6 @@ const onSave = async () => {
   font-size: 28rpx;
   line-height: 1;
   color: var(--color-outline);
-}
-
-.tag-secondary {
-  border-color: var(--color-secondary-fixed);
-  background: rgba(207, 229, 255, 0.2);
-  color: var(--color-on-secondary-container);
-}
-
-.tag-tertiary {
-  border-color: var(--color-tertiary-fixed);
-  background: rgba(255, 220, 198, 0.2);
-  color: var(--color-on-tertiary-container);
-}
-
-.tag-primary {
-  border-color: var(--color-primary-fixed);
-  background: var(--color-primary-fixed);
-  color: var(--color-on-primary-container);
-}
-
-.tag-neutral {
-  border-color: var(--color-surface-variant);
-  background: var(--color-surface-container-low);
-  color: var(--color-on-surface-variant);
 }
 
 .tag-selected {

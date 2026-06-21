@@ -73,7 +73,7 @@
             v-for="tag in homePet.tags"
             :key="tag.label"
             class="tag"
-            :class="tag.className"
+            :style="tag.style"
           >{{ tag.label }}</text>
         </view>
         <!-- Family Sharing -->
@@ -672,26 +672,6 @@ const onNotification = () => {
   border-radius: 9999px;
   font-size: 13px;
   font-weight: 700;
-}
-
-.tag-primary {
-  background: rgba(94, 140, 131, 0.1);
-  color: var(--color-primary);
-}
-
-.tag-error {
-  background: var(--color-error-container);
-  color: var(--color-error);
-}
-
-.tag-secondary {
-  background: var(--color-secondary-container);
-  color: var(--color-on-secondary-container);
-}
-
-.tag-muted {
-  background: var(--color-surface-container-highest);
-  color: var(--color-on-surface-variant);
 }
 
 /* Family Sharing */

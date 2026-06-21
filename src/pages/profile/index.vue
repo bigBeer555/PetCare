@@ -55,7 +55,7 @@
               <image class="pet-avatar" :src="pet.avatar" :class="pet.borderClass" />
               <text class="pet-name">{{ pet.name }}</text>
               <text class="pet-desc">{{ pet.desc }}</text>
-              <text class="pet-tag" :class="pet.tagClass">{{ pet.tag }}</text>
+              <text class="pet-tag" :style="pet.tagStyle">{{ pet.tag }}</text>
             </view>
             <!-- <view class="add-pet-btn" @click="onAddPet">
               <image class="add-pet-icon" src="/static/svg/add-label.svg" mode="aspectFit" />
@@ -65,7 +65,7 @@
         </scroll-view>
       </view>
 
-      <view class="function-grid">
+      <!-- <view class="function-grid">
         <view
           v-for="fn in functions"
           :key="fn.label"
@@ -77,7 +77,7 @@
           </view>
           <text class="function-label">{{ fn.label }}</text>
         </view>
-      </view>
+      </view> -->
 
       <view class="menu-list">
         <view
@@ -277,6 +277,10 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
 .nav-action-icon--settings {
   -webkit-mask-image: url('/static/svg/settings.svg');
   mask-image: url('/static/svg/settings.svg');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-filter: none;
+  filter: none;
 }
 
 .profile-section {
@@ -450,19 +454,8 @@ const onMenu = (id: string) => uni.showToast({ title: id, icon: 'none' })
   font-size: 20rpx;
   padding: 8rpx 24rpx;
   border-radius: 19998rpx;
-  border-bottom: 4rpx solid;
-}
-
-.tag-secondary {
-  background: var(--color-secondary-fixed);
-  color: var(--color-on-secondary-fixed-variant);
-  border-color: var(--color-secondary-container);
-}
-
-.tag-tertiary {
-  background: var(--color-tertiary-fixed);
-  color: var(--color-on-tertiary-fixed-variant);
-  border-color: var(--color-tertiary-container);
+  border-bottom-width: 4rpx;
+  border-bottom-style: solid;
 }
 
 .add-pet-btn {

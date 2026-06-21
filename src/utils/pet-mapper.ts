@@ -1,4 +1,5 @@
 import type { CreatePetRequest, Pet } from '@/types/api'
+import { mapApiTagsToDisplayTags, getTagStyleClassByIndex, getPetTagStyle, type PetTagStyleClass } from '@/utils/pet-tag-styles'
 
 const DEFAULT_PET_AVATAR =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDp5eWXHUzzsQLNTckgxaXjRDQAU6-uJnPLfx8uJ0lnbxvOxJhMeQYXE-FaS0GK159ZtXCm3gMIOdl4IlvluGZdmRKd5tOQl8YW-XiJupP-bQct4Hk2HxffTKsWzqCZyO6AlEZEfARYqf4cpW5CeMGNiw6O19edyJKZo7PCtyBIFB0WbSlzjqTbIoJJ2cMuObuXhGIYzOpjbYRu9ptOdTxr1zSPn2CCBzvLa3LB4FBX-KAoGV-WIohmCnfGqPSdPiqTZsTds4o0nng'
@@ -96,8 +97,8 @@ export function getProfileBorderClass(species: string): string {
   return 'border-primary'
 }
 
-export function getProfileTagClass(index: number): string {
-  return index % 2 === 0 ? 'tag-secondary' : 'tag-tertiary'
+export function getProfileTagClass(index: number): PetTagStyleClass {
+  return getTagStyleClassByIndex(index)
 }
 
 export function buildPetNotes(tagLabels: string[]): string | undefined {
@@ -121,7 +122,6 @@ export function buildCreatePetPayload(input: {
   birthday: string
   weight: string
   avatarUrl?: string
-  tagLabels: string[]
   isDefault?: boolean
 }): CreatePetRequest {
   const payload: CreatePetRequest = {
@@ -140,9 +140,6 @@ export function buildCreatePetPayload(input: {
 
   if (input.avatarUrl) payload.avatarUrl = input.avatarUrl
 
-  const notes = buildPetNotes(input.tagLabels)
-  if (notes) payload.notes = notes
-
   if (input.isDefault !== undefined) payload.isDefault = input.isDefault
 
   return payload
@@ -153,17 +150,6 @@ export function pickDefaultPet(pets: Pet[]): Pet | null {
   return pets.find((pet) => pet.isDefault === true) ?? pets[0]
 }
 
-const HOME_TAG_CLASSES = [
-  'tag-primary',
-  'tag-error',
-  'tag-secondary',
-  'tag-muted',
-] as const
-
-export function getHomeTagClass(index: number): string {
-  return HOME_TAG_CLASSES[index % HOME_TAG_CLASSES.length]
-}
-
 export function formatHomePetDesc(pet: Pet): string {
   const breed = pet.breed || pet.species
   const age = calcPetAgeLabel(pet.birthday)
@@ -172,7 +158,7 @@ export function formatHomePetDesc(pet: Pet): string {
 }
 
 export function mapPetToHomeDisplay(pet: Pet) {
-  const tagLabels = parseNotesToTagLabels(pet.notes)
+  const displayTags = mapApiTagsToDisplayTags(pet.tags)
   const type = mapSpeciesToPetType(pet.species)
 
   return {
@@ -181,11 +167,8 @@ export function mapPetToHomeDisplay(pet: Pet) {
     avatar: getPetAvatarUrl(pet),
     desc: formatHomePetDesc(pet),
     badgeIcon: getSpeciesBadgeIcon(pet.species),
-    badgeLabel: tagLabels[0] || (type === 'cat' ? '猫咪' : type === 'dog' ? '狗狗' : '宠物'),
-    tags: tagLabels.map((label, index) => ({
-      label,
-      className: getHomeTagClass(index),
-    })),
+    badgeLabel: displayTags[0]?.label || (type === 'cat' ? '猫咪' : type === 'dog' ? '狗狗' : '宠物'),
+    tags: displayTags.map(({ label, className, style }) => ({ label, className, style })),
     gender: mapApiToGender(pet.gender),
   }
 }
@@ -209,14 +192,16 @@ export function mapPetToListItem(pet: Pet) {
 }
 
 export function mapPetToProfileCard(pet: Pet, index: number) {
-  const tagLabels = parseNotesToTagLabels(pet.notes)
+  const displayTags = mapApiTagsToDisplayTags(pet.tags || [])
+  const firstDisplayTag = displayTags[0]
+
   return {
     id: pet.id,
     name: pet.name,
     desc: formatProfilePetDesc(pet),
-    tag: tagLabels[0] || '暂无标签',
+    tag: firstDisplayTag?.label || '暂无标签',
     avatar: getPetAvatarUrl(pet),
     borderClass: getProfileBorderClass(pet.species),
-    tagClass: getProfileTagClass(index),
+    tagStyle: firstDisplayTag?.style ?? getPetTagStyle(getProfileTagClass(index)),
   }
 }

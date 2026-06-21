@@ -20,6 +20,13 @@ export interface LoginData {
   user: User
 }
 
+export interface PetTag {
+  id: string
+  petId: string
+  label: string
+  createdAt: string
+}
+
 export interface Pet {
   id: string
   userId: string
@@ -32,6 +39,7 @@ export interface Pet {
   avatarUrl: string | null
   notes: string | null
   isDefault: boolean
+  tags: PetTag[]
   createdAt: string
   updatedAt: string
 }
@@ -49,6 +57,14 @@ export interface CreatePetRequest {
 }
 
 export type UpdatePetRequest = Partial<CreatePetRequest>
+
+export interface CreatePetTagRequest {
+  label: string
+}
+
+export interface DeletePetTagData {
+  deleted: true
+}
 
 export interface UploadImageData {
   url: string

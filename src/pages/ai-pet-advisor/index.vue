@@ -100,9 +100,14 @@
           </view>
           <view class="message-content">
             <view class="bubble bubble-ai bubble-loading">
-              <text class="bubble-text thinking-text">
-                正在思考中<text class="thinking-dots">{{ thinkingDots }}</text>
-              </text>
+              <view class="bubble-text thinking-wrap">
+                <text class="thinking-label">正在思考中</text>
+                <text class="thinking-dots">
+                  <text class="thinking-dot">.</text>
+                  <text class="thinking-dot">.</text>
+                  <text class="thinking-dot">.</text>
+                </text>
+              </view>
             </view>
           </view>
         </view>
@@ -230,7 +235,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { onShow, onUnload } from '@dcloudio/uni-app'
 import PageNavBar from '@/components/page-nav-bar/index.vue'
 import {
@@ -252,7 +257,6 @@ const AI_WELCOME_MESSAGE =
 
 const STREAM_CHAR_INTERVAL_MS = 32
 const STREAM_SCROLL_EVERY_CHARS = 4
-const THINKING_DOTS_INTERVAL_MS = 450
 const MAX_PENDING_IMAGES = 4
 
 interface PendingImage {
@@ -280,9 +284,6 @@ const streamingMessageId = ref<number | null>(null)
 const streamingDisplayedText = ref('')
 
 let streamTimer: ReturnType<typeof setInterval> | null = null
-let thinkingDotsTimer: ReturnType<typeof setInterval> | null = null
-
-const thinkingDots = ref('.')
 
 const suggestions = [
   { text: '最近拉肚子怎么办？', type: 'chip-primary' },
@@ -413,32 +414,6 @@ const stopStreamTyping = () => {
   streamingDisplayedText.value = ''
 }
 
-const stopThinkingAnimation = () => {
-  if (thinkingDotsTimer !== null) {
-    clearInterval(thinkingDotsTimer)
-    thinkingDotsTimer = null
-  }
-  thinkingDots.value = '.'
-}
-
-const startThinkingAnimation = () => {
-  stopThinkingAnimation()
-  let step = 0
-  thinkingDots.value = '.'
-  thinkingDotsTimer = setInterval(() => {
-    step = (step + 1) % 3
-    thinkingDots.value = '.'.repeat(step + 1)
-  }, THINKING_DOTS_INTERVAL_MS)
-}
-
-watch(sending, (isSending) => {
-  if (isSending) {
-    startThinkingAnimation()
-  } else {
-    stopThinkingAnimation()
-  }
-})
-
 const startStreamTyping = (message: AiMessage) => {
   stopStreamTyping()
 
@@ -466,28 +441,80 @@ const startStreamTyping = (message: AiMessage) => {
   }, STREAM_CHAR_INTERVAL_MS)
 }
 
-const formatMessageTime = (datetime: string) => {
-  const timePart = datetime.split(' ')[1] || datetime
-  const [hourText, minuteText] = timePart.split(':')
-  const hour = Number(hourText)
-  const minute = minuteText || '00'
-  if (Number.isNaN(hour)) {
-    return timePart.slice(0, 5)
+const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+
+const parseApiDateTime = (datetime: string) => {
+  const [datePart, timePart = ''] = datetime.trim().split(' ')
+  const [yearText, monthText, dayText] = (datePart || '').split('-')
+  const year = Number(yearText)
+  const month = Number(monthText)
+  const day = Number(dayText)
+  if (!year || !month || !day) {
+    return null
   }
+
+  const [hourText, minuteText] = (timePart || '00:00:00').split(':')
+  const hour = Number(hourText)
+  const minute = Number(minuteText)
+
+  return new Date(
+    year,
+    month - 1,
+    day,
+    Number.isNaN(hour) ? 0 : hour,
+    Number.isNaN(minute) ? 0 : minute,
+  )
+}
+
+const startOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+const formatTimeOfDay = (date: Date) => {
+  const hour = date.getHours()
+  const minute = String(date.getMinutes()).padStart(2, '0')
   const period = hour < 12 ? '上午' : '下午'
   const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
   return `${period} ${hour12}:${minute}`
 }
 
-const formatListTime = (datetime: string) => {
-  const datePart = datetime.split(' ')[0] || ''
-  const today = new Date()
-  const todayText = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-  if (datePart === todayText) {
-    return formatMessageTime(datetime)
+const formatMessageTime = (datetime: string) => {
+  const date = parseApiDateTime(datetime)
+  if (!date || Number.isNaN(date.getTime())) {
+    const timePart = datetime.split(' ')[1] || datetime
+    const [hourText, minuteText] = timePart.split(':')
+    const hour = Number(hourText)
+    const minute = minuteText || '00'
+    if (Number.isNaN(hour)) {
+      return timePart.slice(0, 5)
+    }
+    const period = hour < 12 ? '上午' : '下午'
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+    return `${period} ${hour12}:${minute}`
   }
-  return datePart.slice(5)
+
+  const timeText = formatTimeOfDay(date)
+  const todayStart = startOfDay(new Date())
+  const messageStart = startOfDay(date)
+  const diffDays = Math.floor(
+    (todayStart.getTime() - messageStart.getTime()) / (24 * 60 * 60 * 1000),
+  )
+
+  if (diffDays <= 0) {
+    return timeText
+  }
+  if (diffDays === 1) {
+    return `昨天 ${timeText}`
+  }
+  if (diffDays < 7) {
+    return `${WEEKDAY_LABELS[date.getDay()]} ${timeText}`
+  }
+  if (diffDays < 365) {
+    return `${date.getMonth() + 1}月${date.getDate()}日 ${timeText}`
+  }
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${timeText}`
 }
+
+const formatListTime = (datetime: string) => formatMessageTime(datetime)
 
 const loadConversationList = async () => {
   listLoading.value = true
@@ -768,7 +795,6 @@ onShow(() => {
 
 onUnload(() => {
   stopStreamTyping()
-  stopThinkingAnimation()
 })
 </script>
 
@@ -957,31 +983,121 @@ onUnload(() => {
   border-bottom-right-radius: 8rpx;
 }
 
-.bubble-loading {
-  animation: bubble-breathe 2.4s ease-in-out infinite;
+.thinking-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  line-height: 40rpx;
+  min-height: 40rpx;
 }
 
-.thinking-text {
-  color: var(--color-on-surface-variant);
+.thinking-label {
+  display: inline-block;
+  flex-shrink: 0;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    #3a3a3a 0%,
+    #3a3a3a 22%,
+    #6b6b6b 38%,
+    #f5f5f5 50%,
+    #6b6b6b 62%,
+    #3a3a3a 78%,
+    #3a3a3a 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 260% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: thinking-spotlight 4.2s ease-in-out infinite;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes thinking-spotlight {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  38% {
+    background-position: 0% 50%;
+  }
+
+  45% {
+    background-position: 100% 50%;
+  }
+
+  72% {
+    background-position: 50% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .thinking-dots {
-  display: inline-block;
-  min-width: 1.5em;
-  color: var(--color-primary);
-  animation: thinking-dots-breathe 1.8s ease-in-out infinite;
+  display: inline-flex;
+  align-items: center;
+  width: 36rpx;
+  height: 40rpx;
+  flex-shrink: 0;
+  margin-left: 2rpx;
 }
 
-@keyframes thinking-dots-breathe {
+.thinking-dot {
+  color: var(--color-primary);
+}
+
+.thinking-dot:nth-child(1) {
+  opacity: 1;
+}
+
+.thinking-dot:nth-child(2) {
+  animation: thinking-dot-2 1.35s steps(1, end) infinite;
+}
+
+.thinking-dot:nth-child(3) {
+  animation: thinking-dot-3 1.35s steps(1, end) infinite;
+}
+
+@keyframes thinking-dot-2 {
   0%,
-  100% {
+  32% {
+    opacity: 0;
+  }
+
+  33%,
+  99% {
     opacity: 1;
   }
 
-  50% {
-    opacity: 0.35;
+  100% {
+    opacity: 0;
   }
 }
+
+@keyframes thinking-dot-3 {
+  0%,
+  65% {
+    opacity: 0;
+  }
+
+  66%,
+  99% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 
 .bubble-streaming {
   animation: bubble-breathe 2.4s ease-in-out infinite;
